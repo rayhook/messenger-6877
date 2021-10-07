@@ -1,19 +1,42 @@
-import { createMuiTheme } from "@material-ui/core";
+import { createTheme } from "@material-ui/core";
 
-export const theme = createMuiTheme({
+export const theme = createTheme({
   typography: {
-    fontFamily: "Open Sans, sans-serif",
+    fontFamily: "Open Sans",
     fontSize: 14,
+    body1: {
+      fontFamily: "Montserrat",
+      fontSize: 14
+    },
+    body2: {
+      fontFamily: "Open Sans",
+      fontSize: 40
+    },
+
     button: {
       textTransform: "none",
-      letterSpacing: 0,
-      fontWeight: "bold"
+      fontWeight: "bold",
+      fontFamily: "Montserrat"
     }
   },
   overrides: {
     MuiInput: {
       input: {
-        fontWeight: "bold"
+        fontWeight: "800",
+        paddingTop: "2rem",
+        fontSize: "1rem",
+        width: "36rem",
+        marginTop: "1rem"
+      }
+    },
+    MuiInputLabel: {
+      root: {
+        fontSize: "1.25rem"
+      },
+      outlined: {
+        "&$shrink": {
+          shrink: false
+        }
       }
     }
   },
