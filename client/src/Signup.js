@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import {
@@ -7,260 +7,263 @@ import {
   Button,
   FormControl,
   TextField,
-  FormHelperText,
   makeStyles,
   Typography
 } from "@material-ui/core";
 
 import { register } from "./store/utils/thunkCreators";
-import signInImg from "./resources/bg-img.png";
+import sideImg from "./resources/bg-img.png";
 import { ChatIcon } from "./resources/ChatIcon";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
+  mainContainer: {
+    width: "100vw",
+    height: "100vh"
+  },
+
+  gridLeft: {
+    width: "40%",
+    [theme.breakpoints.down("md")]: {
+      display: "none"
+    }
+  },
+  gridRight: {
+    width: "60%",
+    [theme.breakpoints.down("md")]: {
+      width: "100%"
+    }
+  },
+
+  sideImgContainer: {
+    backgroundImage: `linear-gradient(#3A8DFF, #86B9FF)`,
+    height: "100%",
+    position: "relative"
+  },
+  iconTitleContainer: {
+    height: "100%",
+    display: "flex",
+    flexDirection: " column",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  imgContainer: {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    opacity: "15%",
+    top: "0rem",
+    left: "0rem"
+  },
   ChatIcon: {
-    width: "9rem",
-    height: "9rem",
-    marginBottom: "3.5rem"
+    width: theme.spacing(35),
+    height: theme.spacing(35),
+    marginBottom: theme.spacing(10)
+  },
+  registerFormGrid: {},
+
+  loginRegisterFormContanier: {
+    display: "flex",
+    flexDirection: "column",
+    marginRight: theme.spacing(15),
+    marginLeft: theme.spacing(15),
+    marginTop: theme.spacing(5),
+    marginBottom: theme.spacing(5),
+    "@media (max-width:900px)": {
+      marginTop: theme.spacing(15),
+      marginBottom: theme.spacing(15)
+    }
   },
 
-  loginButton: {
-    width: "14.5rem",
-    height: "5rem",
-    fontSize: 22,
-    color: "#3A8DFF",
+  logingRegisterContainer: {
+    display: "flex",
+    justifyContent: "flex-end",
+    "@media (max-width:900px)": {
+      justifyContent: "center"
+    },
+    alignItems: "center"
+  },
+
+  LoginRegisterSubTitle: {
+    marginRight: theme.spacing(12)
+  },
+
+  loginRegisterButton: {
+    width: theme.spacing(55),
+    height: theme.spacing(20),
+    color: theme.palette.primary.main,
     boxShadow: "5px 2px 30px -12px rgba(0,0,0,0.35)",
-    borderRadius: "0.5rem",
-    border: "none",
-    fontWeight: "bold"
+    borderRadius: theme.spacing(1.2),
+    border: "none"
   },
-
-  createButton: {
-    width: "16rem",
-    height: "5.5rem",
-    marginTop: "5rem",
-    fontSize: 28,
-    color: "#ffff",
+  formTitleContainer: {
+    display: "flex",
+    justifyContent: "center",
+    width: "100%",
+    marginTop: theme.spacing(40),
+    "@media (max-width:900px)": {
+      marginTop: theme.spacing(10)
+    }
+  },
+  formTitle: {
+    marginBottom: theme.spacing(5)
+  },
+  formButton: {
+    backgroundColor: theme.palette.primary.main,
+    margin: theme.spacing(1),
+    height: theme.spacing(20),
+    width: theme.spacing(60),
+    marginTop: theme.spacing(20),
+    "@media (max-width:900px)": {
+      marginTop: theme.spacing(10)
+    },
+    color: theme.palette.bright.main,
     boxShadow: "0 4px 20px 0 rgba(61, 71, 82, 0.1), 0 0 0 0 rgba(0, 127, 255, 0);",
-    borderRadius: "0.5rem",
+    borderRadius: theme.spacing(1.2),
     border: "none",
-    backgroundColor: "#3A8DFF",
     "&:hover": {
-      backgroundColor: "#ffffff",
-      color: "#3A8DFF"
+      backgroundColor: theme.palette.bright.main,
+      color: theme.palette.primary.main
     }
   }
-});
+}));
 
 const Login = (props) => {
   const history = useHistory();
   const { user, register } = props;
-  const [formErrorMessage, setFormErrorMessage] = useState({});
 
   const handleRegister = async (event) => {
     event.preventDefault();
     const username = event.target.username.value;
     const email = event.target.email.value;
     const password = event.target.password.value;
-    const confirmPassword = event.target.confirmPassword.value;
-
-    if (password !== confirmPassword) {
-      setFormErrorMessage({ confirmPassword: "Passwords must match" });
-      return;
-    }
 
     await register({ username, email, password });
   };
+  const loginRedirect = () => history.push("/login");
+
   const classes = useStyles();
   if (user.id) {
     return <Redirect to="/home" />;
   }
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        width: "100vw",
-        height: "100vh",
-        margin: "0px"
-      }}
-    >
-      <Grid container sx={{ justifyContent: { xs: "center", md: "normal" } }}>
-        <Grid item xs={5}>
-          <Box
-            display={{ xs: "none", lg: "block" }}
-            sx={{
-              backgroundImage: `linear-gradient(#3A8DFF, #86B9FF)`,
-              height: "100%",
-              position: "relative",
-              overflow: "hidden"
-            }}
-          >
-            <Box
-              sx={{
-                height: "100%",
-                display: "flex",
-                flexDirection: " column",
-                justifyContent: "center",
-                alignItems: "center"
-              }}
-            >
-              <ChatIcon className={classes.ChatIcon} />
-              <Box sx={{ typography: "body", fontSize: 40, color: "#ffffff", fontWeight: "bold" }}>
-                Converse with anyone
-              </Box>
-              <Box sx={{ typography: "body", fontSize: 40, color: "#ffffff", fontWeight: "bold" }}>
-                with any language
-              </Box>
-            </Box>
-            <Box
-              component="img"
-              sx={{
-                width: "100%",
-                height: "100%",
-                position: "absolute",
-                opacity: "15%",
-                top: "0rem",
-                left: "0rem"
-              }}
-              src={signInImg}
-              alt="signin background image"
-            ></Box>
-          </Box>
-        </Grid>
-        <Grid item xs={7}>
-          <Box sx={{ display: "flex", flexDirection: "column", width: "100%", height: "100%" }}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                mt: "3.5rem",
-                mr: "3.5rem"
-              }}
-            >
-              <Box display={{ xs: "none", md: "block" }}>
-                <Box
-                  sx={{
-                    typography: "body2",
-                    fontSize: 22,
-                    color: "#8c8c8c",
-                    mr: "3.5rem"
-                  }}
-                >
-                  Already have an account?
-                </Box>
-              </Box>
-
-              <Button
-                className={classes.loginButton}
-                variant="outlined"
-                size="large"
-                onClick={() => history.push("/login")}
-              >
-                Login
-              </Button>
-            </Box>
-
-            <Grid>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  mt: "3.5rem"
-                }}
-              >
-                <Box>
-                  <form onSubmit={handleRegister}>
-                    <Box sx={{ m: "2", flexDirection: "row" }}>
-                      <Box
-                        sx={{
-                          typography: "body2",
-                          fontSize: 40,
-                          fontWeight: "500",
-                          marginY: "2rem",
-                          paddingY: "1.5rem"
-                        }}
-                      >
-                        Create an account.
-                      </Box>
-                      <Box>
-                        <Box>
-                          <FormControl>
-                            <TextField
-                              InputLabelProps={{ shrink: false }}
-                              aria-label="username"
-                              label="Username"
-                              name="username"
-                              type="text"
-                              required
-                            />
-                          </FormControl>
-                        </Box>
-                        <Box>
-                          <FormControl>
-                            <TextField
-                              InputLabelProps={{ shrink: false }}
-                              label="E-mail address"
-                              aria-label="e-mail address"
-                              type="email"
-                              name="email"
-                              required
-                            />
-                          </FormControl>
-                        </Box>
-                        <Box>
-                          <FormControl error={!!formErrorMessage.confirmPassword}>
-                            <TextField
-                              InputLabelProps={{ shrink: false }}
-                              aria-label="password"
-                              label="Password"
-                              type="password"
-                              inputProps={{ minLength: 6 }}
-                              name="password"
-                              required
-                            />
-                            <FormHelperText>{formErrorMessage.confirmPassword}</FormHelperText>
-                          </FormControl>
-                        </Box>
-                        <Box>
-                          <FormControl error={!!formErrorMessage.confirmPassword}>
-                            <TextField
-                              InputLabelProps={{ shrink: false }}
-                              label="Confirm Password"
-                              aria-label="confirm password"
-                              type="password"
-                              inputProps={{ minLength: 6 }}
-                              name="confirmPassword"
-                              required
-                            />
-                            <FormHelperText>{formErrorMessage.confirmPassword}</FormHelperText>
-                          </FormControl>
-                        </Box>
-                      </Box>
-                      <Box>
-                        <Box sx={{ display: "flex", justifyContent: "center" }}>
-                          <Button
-                            className={classes.createButton}
-                            type="submit"
-                            variant="contained"
-                            size="large"
-                          >
-                            Create
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Box>
-                  </form>
-                </Box>
-              </Box>
-            </Grid>
-          </Box>
-        </Grid>
+    <Grid container className={classes.mainContainer}>
+      <Grid item className={classes.gridLeft}>
+        <SideImgColumn classes={classes} />
       </Grid>
-    </Box>
+      <Grid item className={classes.gridRight}>
+        <Box className={classes.loginRegisterFormContanier}>
+          <LoginRegister
+            classes={classes}
+            handleRedirect={loginRedirect}
+            buttonText="Login"
+            title="Already have an account?"
+          />
+          <Form
+            type="register"
+            handleAction={handleRegister}
+            classes={classes}
+            formTitle="Create an account."
+            buttonText="Create"
+          />
+        </Box>
+      </Grid>
+    </Grid>
   );
 };
+
+export const SideImgColumn = ({ classes }) => (
+  <Box className={classes.sideImgContainer}>
+    <Box className={classes.iconTitleContainer}>
+      <ChatIcon className={classes.ChatIcon} />
+      <Typography variant="h4">Converse with anyone</Typography>
+      <Typography variant="h4">with any language</Typography>
+    </Box>
+    <img className={classes.imgContainer} src={sideImg} alt="talk to anyone" />
+  </Box>
+);
+
+export const LoginRegister = ({ classes, handleRedirect, buttonText, title }) => (
+  <Grid className={classes.logingRegisterContainer}>
+    <Box className={classes.LoginRegisterSubTitle} display={{ xs: "none", md: "block" }}>
+      <Typography color="secondary" variant="subtitle1">
+        {title}
+      </Typography>
+    </Box>
+
+    <Button
+      className={classes.loginRegisterButton}
+      variant="outlined"
+      size="large"
+      onClick={handleRedirect}
+    >
+      {buttonText}
+    </Button>
+  </Grid>
+);
+export const Form = ({ handleAction, classes, formTitle, buttonText, type }) => (
+  <Grid>
+    <Box className={classes.formTitleContainer}>
+      <Box>
+        <Box className={classes.formTitle}>
+          <Typography variant="h3">{formTitle}</Typography>
+        </Box>
+        <form onSubmit={handleAction}>
+          <Box>
+            <Box>
+              <Box>
+                <FormControl>
+                  <TextField
+                    InputLabelProps={{ shrink: false }}
+                    aria-label="username"
+                    label="Username"
+                    name="username"
+                    type="text"
+                    required
+                  />
+                </FormControl>
+              </Box>
+              {type === "register" && (
+                <Box>
+                  <FormControl>
+                    <TextField
+                      InputLabelProps={{ shrink: false }}
+                      label="E-mail address"
+                      aria-label="e-mail address"
+                      type="email"
+                      name="email"
+                      required
+                    />
+                  </FormControl>
+                </Box>
+              )}
+              <Box>
+                <FormControl>
+                  <TextField
+                    InputLabelProps={{ shrink: false }}
+                    aria-label="password"
+                    label="Password"
+                    type="password"
+                    inputProps={{ minLength: 6 }}
+                    name="password"
+                    required
+                  />
+                </FormControl>
+              </Box>
+            </Box>
+            <Box>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <Button className={classes.formButton} type="submit" variant="contained">
+                  {buttonText}
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        </form>
+      </Box>
+    </Box>
+  </Grid>
+);
 
 const mapStateToProps = (state) => {
   return {
