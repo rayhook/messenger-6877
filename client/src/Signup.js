@@ -10,12 +10,11 @@ import {
   makeStyles,
   Typography
 } from "@material-ui/core";
-
 import { register } from "./store/utils/thunkCreators";
 import sideImg from "./resources/bg-img.png";
 import { ChatIcon } from "./resources/ChatIcon";
 
-const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles((theme) => ({
   mainContainer: {
     width: "100vw",
     height: "100vh"
@@ -59,7 +58,6 @@ const useStyles = makeStyles((theme) => ({
     height: theme.spacing(35),
     marginBottom: theme.spacing(10)
   },
-  registerFormGrid: {},
 
   loginRegisterFormContanier: {
     display: "flex",
@@ -148,29 +146,55 @@ const Login = (props) => {
 
   return (
     <Grid container className={classes.mainContainer}>
-      <Grid item className={classes.gridLeft}>
-        <SideImgColumn classes={classes} />
-      </Grid>
-      <Grid item className={classes.gridRight}>
-        <Box className={classes.loginRegisterFormContanier}>
-          <LoginRegister
-            classes={classes}
-            handleRedirect={loginRedirect}
-            buttonText="Login"
-            title="Already have an account?"
-          />
-          <Form
-            type="register"
-            handleAction={handleRegister}
-            classes={classes}
-            formTitle="Create an account."
-            buttonText="Create"
-          />
-        </Box>
-      </Grid>
+      <LeftGrid classes={classes} />
+      <RightGrid
+        classes={classes}
+        title="Already have an account?"
+        handleRedirect={loginRedirect}
+        buttonText="Login"
+        type="register"
+        formTitle="Create an account."
+        handleSubmit={handleRegister}
+        SubmitButtonText="Create"
+      />
     </Grid>
   );
 };
+
+export const LeftGrid = ({ classes }) => (
+  <Grid item className={classes.gridLeft}>
+    <SideImgColumn classes={classes} />
+  </Grid>
+);
+
+export const RightGrid = ({
+  classes,
+  handleRedirect,
+  handleSubmit,
+  type,
+  title,
+  buttonText,
+  formTitle,
+  SubmitButtonText
+}) => (
+  <Grid item className={classes.gridRight}>
+    <Box className={classes.loginRegisterFormContanier}>
+      <LoginRegister
+        classes={classes}
+        handleRedirect={handleRedirect}
+        buttonText={buttonText}
+        title={title}
+      />
+      <Form
+        type={type}
+        handleAction={handleSubmit}
+        classes={classes}
+        formTitle={formTitle}
+        SubmitButtonText={SubmitButtonText}
+      />
+    </Box>
+  </Grid>
+);
 
 export const SideImgColumn = ({ classes }) => (
   <Box className={classes.sideImgContainer}>
@@ -201,7 +225,24 @@ export const LoginRegister = ({ classes, handleRedirect, buttonText, title }) =>
     </Button>
   </Grid>
 );
-export const Form = ({ handleAction, classes, formTitle, buttonText, type }) => (
+
+const FormContainer = ({ ariaLabel, label, name, type, inputProps }) => (
+  <Box>
+    <FormControl>
+      <TextField
+        InputLabelProps={{ shrink: false, required: false }}
+        aria-label={ariaLabel}
+        label={label}
+        name={name}
+        type={type}
+        inputProps={inputProps}
+        required
+      />
+    </FormControl>
+  </Box>
+);
+
+export const Form = ({ handleAction, classes, formTitle, buttonText, type, SubmitButtonText }) => (
   <Grid>
     <Box className={classes.formTitleContainer}>
       <Box>
@@ -211,50 +252,27 @@ export const Form = ({ handleAction, classes, formTitle, buttonText, type }) => 
         <form onSubmit={handleAction}>
           <Box>
             <Box>
-              <Box>
-                <FormControl>
-                  <TextField
-                    InputLabelProps={{ shrink: false }}
-                    aria-label="username"
-                    label="Username"
-                    name="username"
-                    type="text"
-                    required
-                  />
-                </FormControl>
-              </Box>
+              <FormContainer ariaLabel="username" label="Username" name="username" type="text" />
               {type === "register" && (
-                <Box>
-                  <FormControl>
-                    <TextField
-                      InputLabelProps={{ shrink: false }}
-                      label="E-mail address"
-                      aria-label="e-mail address"
-                      type="email"
-                      name="email"
-                      required
-                    />
-                  </FormControl>
-                </Box>
+                <FormContainer
+                  label="E-mail address"
+                  ariaLabel="e-mail address"
+                  name="email"
+                  type="email"
+                />
               )}
-              <Box>
-                <FormControl>
-                  <TextField
-                    InputLabelProps={{ shrink: false }}
-                    aria-label="password"
-                    label="Password"
-                    type="password"
-                    inputProps={{ minLength: 6 }}
-                    name="password"
-                    required
-                  />
-                </FormControl>
-              </Box>
+              <FormContainer
+                ariaLabel="password"
+                label="Password"
+                name="password"
+                type="password"
+                inputProps={{ minLength: 6 }}
+              />
             </Box>
             <Box>
               <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <Button className={classes.formButton} type="submit" variant="contained">
-                  {buttonText}
+                  {SubmitButtonText}
                 </Button>
               </Box>
             </Box>
