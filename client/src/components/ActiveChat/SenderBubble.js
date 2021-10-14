@@ -23,12 +23,16 @@ const useStyles = makeStyles((theme) => ({
   },
   bubble: {
     background: "#F4F6FA",
-    borderRadius: "10px 10px 0 10px"
+    borderRadius: "10px 10px 0 10px",
+    display: "flex",
+    justifyContent: "flex-end"
   },
   imageRow: {
-    display: "flex"
+    display: "flex",
+    justifyContent: "flex-end"
   },
   imageContainerMulti: {
+    display: "flex",
     width: "100%",
     marginLeft: theme.spacing(1)
   },
@@ -50,24 +54,17 @@ const SenderBubble = (props) => {
   return (
     <Box className={classes.root}>
       <Typography className={classes.date}>{time}</Typography>
-      <Box className={classes.bubble}>
-        {text.length !== 0 && (
-          <>
-            {attachments && attachments[0] && (
-              <Box className={classes.imageRow}>
-                <MutipleImages classes={classes} attachments={attachments} />
-              </Box>
-            )}
-
-            <Typography className={classes.text}>{text}</Typography>
-          </>
+      <Box>
+        {attachments && attachments[0] && (
+          <Box className={classes.imageRow}>
+            <MutipleImages classes={classes} attachments={attachments} />
+          </Box>
         )}
-      </Box>
-      {text.length === 0 && attachments && attachments[0] && (
-        <Box className={classes.imageRow}>
-          <MutipleImages classes={classes} attachments={attachments} />
+
+        <Box className={classes.bubble}>
+          {text.length !== 0 && <Typography className={classes.text}>{text}</Typography>}
         </Box>
-      )}
+      </Box>
     </Box>
   );
 };
@@ -77,6 +74,7 @@ export default SenderBubble;
 const MutipleImages = ({ attachments, classes }) => {
   return attachments.map((URL) => (
     <Box
+      key={URL}
       className={
         attachments.length > 1 ? classes.imageContainerMulti : classes.imageContainerSingle
       }
