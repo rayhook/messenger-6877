@@ -9,38 +9,34 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-  Typography
+  Typography,
+  SvgIcon,
+  InputAdornment,
+  IconButton
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { postMessage } from "../../store/utils/thunkCreators";
-import { AttachIcon } from "../../resources/AttachIcon";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    justifySelf: "flex-end",
-    marginTop: 15
-  },
   dashboard: {
     display: "flex",
     alignItems: "center",
     height: 70,
+    minWidth: "100%",
     position: "fixed",
     zIndex: 1250,
-    width: "78%",
+
     bottom: theme.spacing(10)
   },
-  attachIcon: {
-    maxheight: 70,
-    flex: "1"
-  },
-
   inputContainer: {
-    flex: "7"
+    width: "75%"
   },
   input: {
     height: 70,
     backgroundColor: "#F4F6FA",
+    marginRight: theme.spacing(8),
+    marginLeft: theme.spacing(8),
     borderRadius: 8,
     marginBottom: 20
   },
@@ -60,27 +56,28 @@ const useStyles = makeStyles((theme) => ({
     height: theme.spacing(120),
     width: theme.spacing(90)
   },
+  dialogContent: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center"
+  },
   imageContainer: {
     display: "flex",
-    justifyContent: "center",
-    maxWidth: "30%",
-    maxHeight: "40%"
+    justifyContent: "center"
   },
-  imageText: {
+  dialogInput: {
+    display: "flex",
+    flexDirection: "column",
     width: "40%",
     marginBottom: "2rem"
+  },
+  dialogInputButton: {
+    marginTop: "1rem"
   },
   image: {
     width: "15rem",
     height: "14rem",
     objectFit: "contain"
-  },
-
-  dialogContent: {
-    padding: "2rem",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center"
   },
   inputFile: {
     margin: "1rem"
@@ -104,6 +101,7 @@ const Input = (props) => {
 
   const handleClose = () => {
     setOpen(false);
+    setImageURL([]);
   };
 
   const handleChange = (event) => {
@@ -127,9 +125,8 @@ const Input = (props) => {
     setText("");
   };
 
-  const handleUpload = (event) => {
+  const handleUpload = async (event) => {
     setLoading(true);
-
     const filesSize = event.target.files.length;
     const files = [];
     for (let i = 0; i < filesSize; i++) {
@@ -139,8 +136,8 @@ const Input = (props) => {
     const fileURLs = files.map((file) => {
       const data = new FormData();
       data.append("file", file);
-      data.append("upload_preset", "messenger-app");
-      data.append("cloud_name", "rayhookchris");
+      data.append("upload_preset", process.env.REACT_APP_UPLOAD_PRESET);
+      data.append("cloud_name", process.env.REACT_APP_CLOUD_NAME);
       return fetch("https://api.cloudinary.com/v1_1/rayhookchris/image/upload", {
         method: "post",
         body: data
@@ -151,11 +148,9 @@ const Input = (props) => {
         })
         .catch((err) => console.error(err));
     });
-
-    Promise.all(fileURLs).then(() => {
-      setLoading(false);
-      setIsUploading(false);
-    });
+    await Promise.all(fileURLs);
+    setLoading(false);
+    setIsUploading(false);
   };
 
   const handleSendImage = async () => {
@@ -179,7 +174,7 @@ const Input = (props) => {
     <>
       <Box className={classes.dashboard}>
         <Box className={classes.inputContainer}>
-          <form className={classes.root} onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             <FormControl fullWidth hiddenLabel>
               <FilledInput
                 classes={{ root: classes.input }}
@@ -188,13 +183,31 @@ const Input = (props) => {
                 value={text}
                 name="text"
                 onChange={handleChange}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton variant="text" onClick={handleClickOpen}>
+                      <SvgIcon {...props}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 20 20"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="1"
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </SvgIcon>
+                    </IconButton>
+                  </InputAdornment>
+                }
               />
             </FormControl>
           </form>
         </Box>
-        <Button className={classes.attachIcon} variant="text" onClick={handleClickOpen}>
-          <AttachIcon />
-        </Button>
       </Box>
 
       <Dialog
@@ -221,17 +234,28 @@ const Input = (props) => {
                   <Box className={classes.imageContainer}>
                     <img className={classes.image} src={imageURL[0]} alt="attachment preview" />
                   </Box>
-                  <TextField
-                    className={classes.imageText}
-                    value={imageText}
-                    onChange={handleChangeImageText}
-                    id="standard-basic"
-                    label="add text"
-                    variant="standard"
-                  />
-                  <Button variant="contained" color="primary" onClick={handleSendImage}>
-                    Send
-                  </Button>
+                  <Box
+                    className={classes.dialogInput}
+                    component="form"
+                    noValidate
+                    autoComplete="off"
+                  >
+                    <TextField
+                      value={imageText}
+                      onChange={handleChangeImageText}
+                      id="standard-basic"
+                      label="add text"
+                      variant="standard"
+                    />
+                    <Button
+                      className={classes.dialogInputButton}
+                      variant="contained"
+                      color="primary"
+                      onClick={handleSendImage}
+                    >
+                      Send
+                    </Button>
+                  </Box>
                 </>
               </Box>
             ) : loading ? (
