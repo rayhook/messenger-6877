@@ -10,26 +10,22 @@ const Messages = (props) => {
     <Box>
       {messages.map((message) => {
         const time = moment(message.createdAt).format("h:mm");
-        if (message.senderId === userId) {
-          return (
-            <SenderBubble
-              key={message.id}
-              text={message.text}
-              time={time}
-              attachments={message.attachments}
-            />
-          );
-        } else {
-          return (
-            <OtherUserBubble
-              key={message.id}
-              text={message.text}
-              time={time}
-              otherUser={otherUser}
-              attachments={message.attachments}
-            />
-          );
-        }
+        return message.senderId === userId ? (
+          <SenderBubble
+            key={message.id}
+            text={message.text}
+            time={time}
+            attachments={message.attachments}
+          />
+        ) : (
+          <OtherUserBubble
+            key={message.id}
+            text={message.text}
+            time={time}
+            otherUser={otherUser}
+            attachments={message.attachments}
+          />
+        );
       })}
     </Box>
   );
