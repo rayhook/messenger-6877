@@ -9,14 +9,15 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-  Typography,
   SvgIcon,
   InputAdornment,
-  IconButton
+  IconButton,
+  Grid
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { postMessage } from "../../store/utils/thunkCreators";
+import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
   dashboard: {
@@ -26,7 +27,6 @@ const useStyles = makeStyles((theme) => ({
     minWidth: "100%",
     position: "fixed",
     zIndex: 1250,
-
     bottom: theme.spacing(10)
   },
   inputContainer: {
@@ -44,18 +44,6 @@ const useStyles = makeStyles((theme) => ({
   button: {
     backgroundColor: theme.palette.primary.main
   },
-  dialogTitle: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  dialogContianer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    height: theme.spacing(120),
-    width: theme.spacing(90)
-  },
   dialogContent: {
     display: "flex",
     flexDirection: "column",
@@ -65,14 +53,22 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "center"
   },
+  dialogImage: {
+    width: "80%"
+  },
   dialogInput: {
-    display: "flex",
-    flexDirection: "column",
-    width: "40%",
-    marginBottom: "2rem"
+    marginBottom: theme.spacing(5)
+  },
+  targetInput: {
+    "& .MuiInputBase-input": {
+      width: "100%",
+      height: theme.spacing(5),
+      fontSize: "2rem",
+      marginBottom: theme.spacing(2)
+    }
   },
   dialogInputButton: {
-    marginTop: "1rem"
+    marginTop: theme.spacing(5)
   },
   image: {
     width: "15rem",
@@ -80,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
     objectFit: "contain"
   },
   inputFile: {
-    margin: "1rem"
+    margin: theme.spacing(5)
   }
 }));
 
@@ -90,17 +86,16 @@ const Input = (props) => {
   const { postMessage, otherUser, conversationId, user } = props;
   const [imageURL, setImageURL] = useState([]);
   const [imageText, setImageText] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
-    setIsUploading(true);
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+    setLoading(true);
     setImageURL([]);
   };
 
@@ -126,34 +121,35 @@ const Input = (props) => {
   };
 
   const handleUpload = async (event) => {
-    setLoading(true);
-    const filesSize = event.target.files.length;
-    const files = [];
-    for (let i = 0; i < filesSize; i++) {
-      files.push(event.target.files[i]);
-    }
+    const imageURLs = Object.values(event.target.files).map((URL) => URL);
+    const fileURLs = imageURLs.map(async (imageURL) => {
+      try {
+        const data = new FormData();
+        data.append("file", imageURL);
+        data.append("upload_preset", process.env.REACT_APP_UPLOAD_PRESET);
+        data.append("cloud_name", process.env.REACT_APP_CLOUD_NAME);
+        const result = await axios({
+          method: "post",
+          url: "https://api.cloudinary.com/v1_1/rayhookchris/image/upload",
+          headers: {
+            "Access-Control-Allow-Origin": "*",
 
-    const fileURLs = files.map((file) => {
-      const data = new FormData();
-      data.append("file", file);
-      data.append("upload_preset", process.env.REACT_APP_UPLOAD_PRESET);
-      data.append("cloud_name", process.env.REACT_APP_CLOUD_NAME);
-      return fetch("https://api.cloudinary.com/v1_1/rayhookchris/image/upload", {
-        method: "post",
-        body: data
-      })
-        .then((response) => response.json())
-        .then((result) => {
-          setImageURL((prevArray) => [...prevArray, result.url]);
-        })
-        .catch((err) => console.error(err));
+            mode: "no-cors"
+          },
+          data: {
+            body: data
+          }
+        });
+        setImageURL((prevArray) => [...prevArray, result.url]);
+      } catch (err) {
+        console.error(err);
+      }
     });
     await Promise.all(fileURLs);
     setLoading(false);
-    setIsUploading(false);
   };
 
-  const handleSendImage = async () => {
+  const handleSendImage = async (event) => {
     const reqBody = {
       text: imageText,
       recipientId: otherUser.id,
@@ -164,7 +160,7 @@ const Input = (props) => {
 
     await postMessage(reqBody);
     setImageText("");
-    setIsUploading(false);
+    setLoading(true);
     setImageURL("");
     setText("");
     setOpen(false);
@@ -217,34 +213,44 @@ const Input = (props) => {
         aria-describedby="image-dialog-description"
       >
         <DialogTitle id="image-dialog-title">
-          <Box className={classes.dialogTitle}>
-            {"Select Image"} {<Button onClick={handleClose}>X</Button>}
-          </Box>
+          <Grid
+            container
+            alignItems="center"
+            justifyContent="space-between"
+            className={classes.dialogTitle}
+          >
+            {loading ? "Select Image" : "Images loaded"} <Button onClick={handleClose}>X</Button>
+          </Grid>
         </DialogTitle>
         <DialogContent className={classes.dialogContianer}>
           <DialogActions>
-            {!isUploading ? (
-              <Box className={classes.dialogContent}>
-                <>
-                  <Typography>
-                    {imageURL.length > 1
-                      ? `${imageURL.length} images loaded`
-                      : `${imageURL.length} image loaded`}
-                  </Typography>
-                  <Box className={classes.imageContainer}>
-                    <img className={classes.image} src={imageURL[0]} alt="attachment preview" />
-                  </Box>
-                  <Box
+            <Grid container direction="column" spacing={4} alignItems="center">
+              {loading && <input multiple type="file" onChange={handleUpload} />}
+              {!loading && (
+                <Grid container direction="column" alignItems="center">
+                  <Grid
+                    container
+                    flexDirection="column"
                     className={classes.dialogInput}
                     component="form"
                     noValidate
                     autoComplete="off"
                   >
+                    <Grid container item justifyContent="center">
+                      <img
+                        className={classes.dialogImage}
+                        src={imageURL[0]}
+                        alt="preview attachment before sending"
+                      />
+                    </Grid>
+
                     <TextField
+                      className={classes.targetInput}
                       value={imageText}
+                      name="imageText"
                       onChange={handleChangeImageText}
                       id="standard-basic"
-                      label="add text"
+                      label="Type image caption"
                       variant="standard"
                     />
                     <Button
@@ -252,17 +258,14 @@ const Input = (props) => {
                       variant="contained"
                       color="primary"
                       onClick={handleSendImage}
+                      fullWidth
                     >
                       Send
                     </Button>
-                  </Box>
-                </>
-              </Box>
-            ) : loading ? (
-              <Typography>Uploading...</Typography>
-            ) : (
-              <input multiple type="file" onChange={handleUpload} />
-            )}
+                  </Grid>
+                </Grid>
+              )}
+            </Grid>
           </DialogActions>
         </DialogContent>
       </Dialog>
