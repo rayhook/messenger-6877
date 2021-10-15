@@ -7,6 +7,8 @@ const session = require("express-session");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
 const db = require("./db");
 const { User } = require("./db/models");
+const cors = require("cors");
+
 // create store for sessions to persist in database
 const sessionStore = new SequelizeStore({ db });
 
@@ -18,6 +20,16 @@ app.use(logger("dev"));
 app.use(json());
 app.use(urlencoded({ extended: false }));
 app.use(express.static(join(__dirname, "public")));
+app.use(cors());
+
+var allowCrossDomain = function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  next();
+};
+
+app.use(allowCrossDomain);
 
 app.use(function (req, res, next) {
   const token = req.headers["x-access-token"];
@@ -27,7 +39,7 @@ app.use(function (req, res, next) {
         return next();
       }
       User.findOne({
-        where: { id: decoded.id },
+        where: { id: decoded.id }
       }).then((user) => {
         req.user = user;
         return next();
