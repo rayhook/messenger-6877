@@ -1,13 +1,8 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Box, Typography } from "@material-ui/core";
+import { Typography, Grid } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-end"
-  },
   date: {
     fontSize: 11,
     color: "#BECCE2",
@@ -23,28 +18,19 @@ const useStyles = makeStyles((theme) => ({
   },
   bubble: {
     background: "#F4F6FA",
-    borderRadius: "10px 10px 0 10px",
-    display: "flex",
-    justifyContent: "flex-end"
+    borderRadius: "10px 10px 0 10px"
   },
-  imageRow: {
-    display: "flex",
-    justifyContent: "flex-end"
+  imageGridContainer: {
+    height: theme.spacing(48)
   },
-  imageContainerMulti: {
-    display: "flex",
-    width: "100%",
-    marginLeft: theme.spacing(1)
+
+  multiImageContainer: {
+    height: theme.spacing(30)
   },
-  imageContainerSingle: {
-    width: theme.spacing(60)
-  },
+
   image: {
-    borderRadius: theme.spacing(4),
-    margin: theme.spacing(5),
-    width: theme.spacing(22),
-    minWidth: "100%",
-    verticalAlign: "top"
+    height: "100%",
+    width: "100"
   }
 }));
 
@@ -52,20 +38,24 @@ const SenderBubble = (props) => {
   const classes = useStyles();
   const { time, text, attachments } = props;
   return (
-    <Box className={classes.root}>
+    <Grid container direction="column" alignItems="flex-end" className={classes.root}>
       <Typography className={classes.date}>{time}</Typography>
-      <Box>
-        {attachments && attachments[0] && (
-          <Box className={classes.imageRow}>
-            <MutipleImages classes={classes} attachments={attachments} />
-          </Box>
-        )}
-
-        <Box className={classes.bubble}>
-          {text.length !== 0 && <Typography className={classes.text}>{text}</Typography>}
-        </Box>
-      </Box>
-    </Box>
+      {attachments && attachments[0] && (
+        <Grid
+          container
+          spacing={4}
+          direction="row-reverse"
+          className={
+            attachments.length > 1 ? classes.multiImageContainer : classes.imageGridContainer
+          }
+        >
+          <MutipleImages classes={classes} attachments={attachments} />
+        </Grid>
+      )}
+      <Grid className={classes.bubble}>
+        {text.length !== 0 && <Typography className={classes.text}>{text}</Typography>}
+      </Grid>
+    </Grid>
   );
 };
 
@@ -73,13 +63,6 @@ export default SenderBubble;
 
 const MutipleImages = ({ attachments, classes }) => {
   return attachments.map((URL) => (
-    <Box
-      key={URL}
-      className={
-        attachments.length > 1 ? classes.imageContainerMulti : classes.imageContainerSingle
-      }
-    >
-      <img src={URL} className={classes.image} alt="Sender attachments" />
-    </Box>
+    <img key={URL} src={URL} className={classes.image} alt="Sender attachments" />
   ));
 };
