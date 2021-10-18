@@ -8,15 +8,22 @@ const useStyles = makeStyles(() => ({
   root: {
     display: "flex",
     flexGrow: 8,
-    flexDirection: "column"
+    flexDirection: "column",
+    height: "75vh"
   },
+
   chatContainer: {
     marginLeft: 41,
     marginRight: 41,
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    height: "100%",
+    overflowY: "scroll"
+  },
+  inputContainer: {
+    display: "flex"
   }
 }));
 
@@ -40,6 +47,7 @@ const ActiveChat = (props) => {
               userId={user.id}
             />
             <Input
+              className={classes.inputContainer}
               otherUser={conversation.otherUser}
               conversationId={conversation.id}
               user={user}
