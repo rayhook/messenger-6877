@@ -128,19 +128,12 @@ const Input = (props) => {
         data.append("file", imageURL);
         data.append("upload_preset", process.env.REACT_APP_UPLOAD_PRESET);
         data.append("cloud_name", process.env.REACT_APP_CLOUD_NAME);
-        const result = await axios({
-          method: "post",
-          url: "https://api.cloudinary.com/v1_1/rayhookchris/image/upload",
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-
-            mode: "no-cors"
-          },
-          data: {
-            body: data
-          }
-        });
-        setImageURL((prevArray) => [...prevArray, result.url]);
+        const instance = axios.create();
+        const result = await instance.post(
+          "https://api.cloudinary.com/v1_1/rayhookchris/image/upload",
+          data
+        );
+        setImageURL((prevArray) => [...prevArray, result.data.url]);
       } catch (err) {
         console.error(err);
       }
@@ -149,7 +142,7 @@ const Input = (props) => {
     setLoading(false);
   };
 
-  const handleSendImage = async (event) => {
+  const handleSendImage = async () => {
     const reqBody = {
       text: imageText,
       recipientId: otherUser.id,
