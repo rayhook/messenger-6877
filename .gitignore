@@ -25,3 +25,32 @@ client/.env
 prettier.config.js
 
 
+# Python and Django
+*.pyo
+*.pyd
+*.pyc
+__pycache__/
+*.py[co]
+*.egg-info/
+dist/
+build/
+db.sqlite3
+
+# Django files
+*.log
+*.pot
+*.db
+db.sqlite3
+migrations/
+media/
+
+# Virtual environment
+server_django/firstenv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak
