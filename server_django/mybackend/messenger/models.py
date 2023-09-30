@@ -1,14 +1,22 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
 app_label = "messenger"
 
 
-# class Conversations(models.Model):
-#     timestamp = models.TimeField(auto_now=True, auto_now_add=False)
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
 
-# class Messages(models.Model):
-#     text = models.CharField(max_length=200)
-#     conversation_id = models.ForeignKey(Conversations, on_delete=models.CASCADE)
+class Conversations(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now=True, auto_now_add=False)
+
+
+class Messages(models.Model):
+    conversation = models.ForeignKey(Conversations, on_delete=models.CASCADE)
+    text = models.TextField()
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now=True)

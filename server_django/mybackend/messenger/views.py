@@ -1,14 +1,15 @@
 from django.http import HttpResponse, JsonResponse
-
-# from messenger.models import Conversations, Messages
 from django.views import View
+
+from messenger.models import Conversations
 
 
 def Homepage(request):
     return HttpResponse("Welcome to the messenger app homepage")
 
 
-class Conversation(View):
+class ConversationsView(View):
     def get(self, request):
-        response = {"message": "Serving you all the conversations "}
+        conversations = Conversations.objects.all()
+        response = {"conversations": list(conversations.values())}
         return JsonResponse(response)
