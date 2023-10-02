@@ -6,7 +6,7 @@ A one-to-one realtime chat app.
 
 The data model consists of User, Conversations and Messages tables.
 
-![data model](https://imgur.com/RHCkJSc)
+![data model](./Messenger-data-model.png)
 
 ## Initial Setup
 
