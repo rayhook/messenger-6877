@@ -1,16 +1,38 @@
 # Messenger
 
-A one-to-one realtime chat app.
+Messenger is a simple, user-friendly real-time chat web application that enables one-to-one communication between users. Users can create accounts to send text messages and images to each other seamlessly.
+
+## Features
+
+- Real-time one-to-one chatting.
+- Account creation and authentication.
+- Image and Text messaging.
+- Intuitive UI/UX.
 
 ## Data model
 
-The data model consists of User, Conversations and Messages tables.
+The application relies on three main tables: User, Conversations, and Messages.
 
 ![data model](./Messenger-data-model.png)
 
+## Technologies
+
+- Frontend: React
+- Backend: Express
+- Database: PostgreSQL
+
+## Prerequisites
+
+Before you begin, ensure you have met the following requirements:
+
+- You have a working installation of Node.js and npm.
+- You have PostgreSQL installed.
+
 ## Initial Setup
 
-Create the PostgreSQL database (these instructions may need to be adapted for your operating system):
+### Databse Setup
+
+Create the PostgreSQL database. These instructions may need to be adapted depending on your operating system.
 
 ```
 psql
@@ -18,13 +40,9 @@ CREATE DATABASE messenger;
 \q
 ```
 
-Create a .env file in the server directory and add your session secret:
+### Server Setup
 
-```
-SESSION_SECRET = "your session secret"
-```
-
-In the server directory, install dependencies and then seed the database:
+1. Navigate to the server directory, install the necessary dependencies, and seed the database.
 
 ```
 cd server
@@ -32,25 +50,45 @@ npm install
 
 ```
 
-In the client folder, install dependencies:
+2. Create a .env file in the server directory and add your session secret.
+
+```
+SESSION_SECRET = "your session secret"
+```
+
+### Client Setup
+
+1. In the client folder, install the necessary dependencies.
 
 ```
 cd client
 npm install
 ```
 
-### Running the Application Locally
+## Running the Application Locally
 
-In one terminal, start the front end:
+### Start the Frontend
 
 ```
 cd client
 npm start
 ```
 
-In a separate terminal, start the back end:
+The frontend will be live at http://localhost:3000.
+
+### Start the Frontend
+
+In a separate terminal window, navigate to the server directory and run:
 
 ```
 cd server
 npm run dev
 ```
+
+## Usage
+
+After setting up the application, users can create an account or log in to start chatting in real time.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
