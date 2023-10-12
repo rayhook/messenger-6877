@@ -13,6 +13,7 @@ import {
 import { register } from "./store/utils/thunkCreators";
 import sideImg from "./resources/bg-img.png";
 import { ChatIcon } from "./resources/ChatIcon";
+import axios from "axios";
 
 export const useStyles = makeStyles((theme) => ({
   mainContainer: {
@@ -135,7 +136,11 @@ const Login = (props) => {
     const email = event.target.email.value;
     const password = event.target.password.value;
 
-    await register({ username, email, password });
+    const userData = { username, email, password };
+    // await register({ username, email, password });
+    const API_URL = "http://127.0.0.1:8000/messenger/";
+
+    axios.post(API_URL + "register/", userData);
   };
   const loginRedirect = () => history.push("/login");
 
