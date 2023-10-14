@@ -7,6 +7,8 @@ from rest_framework import status
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 from django.shortcuts import render
+from rest_framework_simplejwt.tokens import BlacklistedToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 from messenger.models import Conversations, UserProfile
 import logging
@@ -55,6 +57,8 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
@@ -65,7 +69,6 @@ class LoginView(APIView):
                 {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
             )
 
-        login(request, user)
         refresh = RefreshToken.for_user(user)
         return Response(
             {
@@ -77,8 +80,26 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
-        logout(request)
+        refresh_token = request.data["refresh"]
+
+        if refresh_token is None:
+            return Response(
+                {"error": "Refresh token is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+        except TokenError:
+            return Response(
+                {"error": "Token is invalid or expired"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(
             {"message": "Logged out successfully"}, status=status.HTTP_200_OK
         )
