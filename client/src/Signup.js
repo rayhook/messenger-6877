@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import {
@@ -128,24 +128,38 @@ export const useStyles = makeStyles((theme) => ({
 
 const Login = (props) => {
   const history = useHistory();
-  const { user, register } = props;
+  const [isSignedup, setIsSignedup] = useState(false);
 
   const handleRegister = async (event) => {
     event.preventDefault();
     const username = event.target.username.value;
     const email = event.target.email.value;
     const password = event.target.password.value;
-
     const userData = { username, email, password };
-    // await register({ username, email, password });
     const API_URL = "http://127.0.0.1:8000/messenger/";
-
-    axios.post(API_URL + "register/", userData);
+    try {
+      let response = await axios.post(API_URL + "register/", userData);
+      if (response.status === 201) {
+        try {
+          let loginResponse = await axios.post(API_URL + "login/", { username, password });
+          localStorage.setItem("access", loginResponse.data.access);
+          localStorage.setItem("refresh", loginResponse.data.refresh);
+          setIsSignedup(true);
+        } catch (err) {
+          console.error("Login failed: ", err.message);
+        }
+      } else {
+        console.error("Register failed", response.statusText);
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
   };
   const loginRedirect = () => history.push("/login");
 
   const classes = useStyles();
-  if (user.id) {
+
+  if (isSignedup) {
     return <Redirect to="/home" />;
   }
 

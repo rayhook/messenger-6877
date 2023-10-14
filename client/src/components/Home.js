@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { Grid, CssBaseline, Button } from "@material-ui/core";
@@ -7,6 +7,7 @@ import { SidebarContainer } from "./Sidebar";
 import { ActiveChat } from "./ActiveChat";
 import { logout, fetchConversations } from "../store/utils/thunkCreators";
 import { clearOnLogout } from "../store/index";
+import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -17,27 +18,32 @@ const useStyles = makeStyles((theme) => ({
 const Home = (props) => {
   const classes = useStyles();
   const { user, logout, fetchConversations } = props;
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
-  useEffect(() => {
-    if (user.id) {
-      setIsLoggedIn(true);
-    }
-  }, [user.id]);
+  // basicallt a GUARD
+  // if (!user.id) {
+  //   // If we were previously logged in, redirect to login instead of register
+  //   if (isLoggedIn) return <Redirect to="/login" />;
+  //   return <Redirect to="/register" />;
+  // }
 
-  useEffect(() => {
-    fetchConversations();
-  }, [fetchConversations]);
-
-  if (!user.id) {
-    // If we were previously logged in, redirect to login instead of register
-    if (isLoggedIn) return <Redirect to="/login" />;
-    return <Redirect to="/register" />;
-  }
+  const APIURL = "http://127.0.0.1:8000/messenger/";
 
   const handleLogout = async () => {
-    await logout(user.id);
+    try {
+      const tokenData = { refresh: localStorage.getItem("refresh") };
+      await axios.post(APIURL + "logout/", tokenData);
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+      setIsLoggedIn(false);
+    } catch (err) {
+      console.error("Logout failed", err.message);
+    }
   };
+
+  if (!isLoggedIn) {
+    return <Redirect to="/login" />;
+  }
 
   return (
     <>

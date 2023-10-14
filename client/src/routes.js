@@ -43,11 +43,6 @@ const Routes = (props) => {
       <Switch>
         <Route path="/login" component={Login} />
         <Route path="/register" component={Signup} />
-        <Route
-          exact
-          path="/"
-          render={(props) => (props.user?.id ? <Home /> : <Signup />)}
-        />
         <Route path="/home" component={Home} />
       </Switch>
     </>
@@ -56,7 +51,7 @@ const Routes = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    user: state.user,
+    user: state.user
   };
 };
 
@@ -64,7 +59,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     fetchUser() {
       dispatch(fetchUser());
-    },
+    }
   };
 };
 
