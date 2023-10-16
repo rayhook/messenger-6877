@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -9,7 +9,9 @@ from django.views import View
 from django.shortcuts import render
 from rest_framework_simplejwt.tokens import BlacklistedToken
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
+JWT_authenticator = JWTAuthentication()
 from messenger.models import Conversations, UserProfile
 import logging
 from rest_framework.permissions import AllowAny
@@ -103,3 +105,24 @@ class LogoutView(APIView):
         return Response(
             {"message": "Logged out successfully"}, status=status.HTTP_200_OK
         )
+
+
+class UsersView(APIView):
+    def get(self, request):
+        response = JWT_authenticator.authenticate(request)
+        if response is not None:
+            # unpacking
+            user, token = response
+            print("this is decoded token claims", token.payload)
+        else:
+            print("no token is provided in the header or the header is missing")
+        try:
+            users_list = UserProfile.objects.all()
+            return Response(
+                {"users": list(users_list.values())}, status=status.HTTP_200_OK
+            )
+        except:
+            return Response(
+                {"error": "failed to get users_list"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
