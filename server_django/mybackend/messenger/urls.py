@@ -10,6 +10,11 @@ urlpatterns = [
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("users/", views.UsersView.as_view(), name="users"),
+    path(
+        "conversation/create",
+        views.ConversationCreateView.as_view(),
+        name="conversation_create",
+    ),
     path("conversations/", views.ConversationsView.as_view(), name="conversations"),
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.LoginView.as_view(), name="login"),
