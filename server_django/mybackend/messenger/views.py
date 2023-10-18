@@ -7,14 +7,16 @@ from rest_framework import status
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 from django.shortcuts import render
-from rest_framework_simplejwt.tokens import BlacklistedToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
-JWT_authenticator = JWTAuthentication()
+
 from messenger.models import Conversations, UserProfile
 import logging
-from rest_framework.permissions import AllowAny
+
+
+JWT_authenticator = JWTAuthentication()
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +27,6 @@ def Homepage(request):
 
 class ConversationsView(View):
     def get(self, request):
-        # get or create conversation(request.user)
-        # convo history = Messages.objects.filter(conversation = conversation)
         conversations = Conversations.objects.all()
         response = {"conversations": list(conversations.values())}
         return JsonResponse(response)
@@ -108,21 +108,35 @@ class LogoutView(APIView):
 
 
 class UsersView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        response = JWT_authenticator.authenticate(request)
-        if response is not None:
-            # unpacking
-            user, token = response
-            print("this is decoded token claims", token.payload)
-        else:
-            print("no token is provided in the header or the header is missing")
         try:
-            users_list = UserProfile.objects.all()
+            users_list = User.objects.all()
+            print("users_list ", users_list)
             return Response(
                 {"users": list(users_list.values())}, status=status.HTTP_200_OK
             )
         except:
             return Response(
                 {"error": "failed to get users_list"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class ConversationCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            conversation = Conversations.objects.create(user=user_profile)
+            return Response(
+                {"conversation_id": conversation.id}, status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            logging.error(f"Error creating conversation: {e}")
+            return Response(
+                {"error": "failed to get conversation_id"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
