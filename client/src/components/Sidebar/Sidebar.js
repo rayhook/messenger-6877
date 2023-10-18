@@ -76,12 +76,25 @@ const Sidebar = (props) => {
     getUsers();
   }, []);
 
+  const handleCreateConversation = async (userId) => {
+    try {
+      const response = await axiosInstance.post("/conversation/create", { userId });
+      if (response.status === 200) {
+      }
+    } catch (error) {}
+  };
+
   return (
     <Box className={classes.root}>
       <CurrentUser />
       <Typography className={classes.title}>Chats</Typography>
       <Search handleChange={handleChange} />
-      {users && users.map((user) => <div key={user.id}>{user.id}</div>)}
+      {users &&
+        users.map((user) => (
+          <div key={user.id} onClick={() => handleCreateConversation(user.id)}>
+            {user.username}
+          </div>
+        ))}
       {/* {conversations
         .filter((conversation) => conversation.otherUser.username.includes(searchTerm))
         .map((conversation) => {
