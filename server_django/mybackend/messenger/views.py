@@ -12,7 +12,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
-from messenger.models import Conversations, UserProfile
+from messenger.models import Conversations, UserProfile, Messages
 import logging
 
 
@@ -113,7 +113,6 @@ class UsersView(APIView):
     def get(self, request):
         try:
             users_list = User.objects.all()
-            print("users_list ", users_list)
             return Response(
                 {"users": list(users_list.values())}, status=status.HTTP_200_OK
             )
