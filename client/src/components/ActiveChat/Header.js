@@ -45,9 +45,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Header = (props) => {
+const Header = ({ username, online }) => {
   const classes = useStyles();
-  const { username, online } = props;
+  // const { username, online } = props;
 
   return (
     <Box className={classes.root}>

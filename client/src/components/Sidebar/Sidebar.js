@@ -23,6 +23,7 @@ const useStyles = makeStyles(() => ({
 const Sidebar = (props) => {
   const classes = useStyles();
   const [users, setUsers] = useState([]);
+  const [convoId, setConvoId] = useState();
 
   // const conversations = props.conversations || [];
   const { handleChange, searchTerm } = props;
@@ -67,7 +68,6 @@ const Sidebar = (props) => {
     async function getUsers() {
       try {
         const response = await axiosInstance.get("users/");
-        console.log("sidebar/response: ", response);
         setUsers(response.data.users);
       } catch (error) {
         console.error("Error fetcheding users", error.message);
@@ -76,30 +76,17 @@ const Sidebar = (props) => {
     getUsers();
   }, []);
 
-  const handleCreateConversation = async (userId) => {
-    try {
-      const response = await axiosInstance.post("/conversation/create", { userId });
-      if (response.status === 200) {
-      }
-    } catch (error) {}
-  };
-
   return (
     <Box className={classes.root}>
       <CurrentUser />
       <Typography className={classes.title}>Chats</Typography>
       <Search handleChange={handleChange} />
-      {users &&
-        users.map((user) => (
-          <div key={user.id} onClick={() => handleCreateConversation(user.id)}>
-            {user.username}
-          </div>
-        ))}
       {/* {conversations
         .filter((conversation) => conversation.otherUser.username.includes(searchTerm))
         .map((conversation) => {
           return <Chat conversation={conversation} key={conversation.otherUser.username} />;
         })} */}
+      {users && users.map((user) => <Chat key={user.id} username={user.username}></Chat>)}
     </Box>
   );
 };

@@ -7,34 +7,30 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "space-between",
     marginLeft: 20,
-    flexGrow: 1,
+    flexGrow: 1
   },
   username: {
     fontWeight: "bold",
-    letterSpacing: -0.2,
+    letterSpacing: -0.2
   },
   previewText: {
     fontSize: 12,
     color: "#9CADC8",
-    letterSpacing: -0.17,
-  },
+    letterSpacing: -0.17
+  }
 }));
 
-const ChatContent = (props) => {
+const ChatContent = ({ username }) => {
   const classes = useStyles();
 
-  const { conversation } = props;
-  const { latestMessageText, otherUser } = conversation;
+  // const { conversation } = props;
+  // const { latestMessageText, otherUser } = conversation;
 
   return (
     <Box className={classes.root}>
       <Box>
-        <Typography className={classes.username}>
-          {otherUser.username}
-        </Typography>
-        <Typography className={classes.previewText}>
-          {latestMessageText}
-        </Typography>
+        <Typography className={classes.username}>{username}</Typography>
+        <Typography className={classes.previewText}>latest chat message</Typography>
       </Box>
     </Box>
   );

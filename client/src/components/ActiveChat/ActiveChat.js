@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
 import { connect } from "react-redux";
+import { ActiveChatContext } from "../../context/activeChat";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -30,25 +31,25 @@ const useStyles = makeStyles(() => ({
 const ActiveChat = (props) => {
   const classes = useStyles();
   const { user } = props;
+  const { activeChat } = useContext(ActiveChatContext);
   const conversation = props.conversation || {};
+
+  console.log("activeChat from cotext in Activechat.js: ", activeChat);
 
   return (
     <Box className={classes.root}>
-      {conversation.otherUser && (
+      {activeChat && (
         <>
-          <Header
-            username={conversation.otherUser.username}
-            online={conversation.otherUser.online || false}
-          />
+          <Header username={activeChat.username} online={true} />
           <Box className={classes.chatContainer}>
-            <Messages
+            {/* <Messages
               messages={conversation.messages}
               otherUser={conversation.otherUser}
               userId={user.id}
-            />
+            /> */}
             <Input
               className={classes.inputContainer}
-              otherUser={conversation.otherUser}
+              otheruser={activeChat.username}
               conversationId={conversation.id}
               user={user}
             />
