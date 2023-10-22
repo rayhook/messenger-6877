@@ -42,11 +42,11 @@ const ActiveChat = (props) => {
         <>
           <Header username={activeChat.username} online={true} />
           <Box className={classes.chatContainer}>
-            {/* <Messages
-              messages={conversation.messages}
-              otherUser={conversation.otherUser}
-              userId={user.id}
-            /> */}
+            <Messages
+            // messages={activeChat.messages}
+            // otherUser={conversation.otherUser}
+            // userId={user.id}
+            />
             <Input
               className={classes.inputContainer}
               otheruser={activeChat.username}

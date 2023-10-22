@@ -40,7 +40,7 @@ const SenderBubble = (props) => {
   return (
     <Grid container direction="column" alignItems="flex-end" className={classes.root}>
       <Typography className={classes.date}>{time}</Typography>
-      {attachments && attachments[0] && (
+      {/* {attachments && attachments[0] && (
         <Grid
           container
           spacing={4}
@@ -51,7 +51,7 @@ const SenderBubble = (props) => {
         >
           <MutipleImages classes={classes} attachments={attachments} />
         </Grid>
-      )}
+      )} */}
       <Grid className={classes.bubble}>
         {text.length !== 0 && <Typography className={classes.text}>{text}</Typography>}
       </Grid>
