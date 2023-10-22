@@ -228,5 +228,9 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": True,
         },
+        "messenger": {  # this corresponds to getLogger(__name__) in views.py
+            "handlers": ["file"],
+            "level": "DEBUG",
+        },
     },
 }
