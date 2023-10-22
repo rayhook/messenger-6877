@@ -139,3 +139,50 @@ class ConversationCreateView(APIView):
                 {"error": "failed to get conversation_id"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class MessageCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logger.info(f"MessageCreateView/request.data {request.data}")
+
+        username = request.data.get("user")
+        conversation_id = request.data.get("conversation")
+        text = request.data.get("text")
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return JsonResponse(
+                {"error": "User with given username does not exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            user_profile = UserProfile.objects.get(user=user)
+        except User.DoesNotExist:
+            return JsonResponse(
+                {"error": "UserProfile with given username does not exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            conversation = Conversations.objects.get(id=conversation_id)
+        except Conversations.DoesNotExist:
+            return JsonResponse(
+                {"error": "Conversation with given ID does not exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            message = Messages.objects.create(
+                conversation=conversation, text=text, user=user_profile
+            )
+            return JsonResponse(
+                {"Success": "Message created"}, status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            logger.error(f"Error creating Message: {e}")
+            return JsonResponse(
+                {"error": "An unexpected error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
