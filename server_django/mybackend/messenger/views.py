@@ -147,7 +147,7 @@ class MessageCreateView(APIView):
     def post(self, request):
         logger.info(f"MessageCreateView/request.data {request.data}")
 
-        username = request.data.get("user")
+        username = request.data.get("username")
         conversation_id = request.data.get("conversation")
         text = request.data.get("text")
         try:
@@ -174,11 +174,12 @@ class MessageCreateView(APIView):
             )
 
         try:
-            message = Messages.objects.create(
+            Messages.objects.create(
                 conversation=conversation, text=text, user=user_profile
             )
+            messages = Messages.objects.filter(conversation_id=conversation_id)
             return JsonResponse(
-                {"Success": "Message created"}, status=status.HTTP_200_OK
+                {"messages": list(messages.values())}, status=status.HTTP_200_OK
             )
         except Exception as e:
             logger.error(f"Error creating Message: {e}")
@@ -186,3 +187,21 @@ class MessageCreateView(APIView):
                 {"error": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+# class MessageList(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         conversation_id = request.data.get("conversationId")
+#         messages = Messages.objects.filter(conversation_id=conversation_id)
+#         try:
+#             return Response(
+#                 {"messages": list(messages.values())}, status=status.HTTP_200_OK
+#             )
+#         except Exception as e:
+#             logger.error(f"Error listing messages {e}")
+#             return Response(
+#                 {"error": "error creating a list"},
+#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             )
