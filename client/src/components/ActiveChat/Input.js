@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   FormControl,
   Button,
@@ -15,9 +15,9 @@ import {
   Grid
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { connect } from "react-redux";
-import { postMessage } from "../../store/utils/thunkCreators";
 import axios from "axios";
+import { ActiveChatContext } from "../../context/activeChat";
+import { connect } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   dashboard: {
@@ -89,6 +89,44 @@ const Input = (props) => {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
+  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
+
+  const APIURL = "http://127.0.0.1:8000/messenger/";
+
+  const axiosInstance = axios.create({
+    baseURL: APIURL,
+    timeout: 5000,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("access")}`
+    }
+  });
+
+  axiosInstance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
+      if (error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        try {
+          const res = await axios.post(APIURL + "api/token/refresh/", {
+            refresh: localStorage.getItem("refresh")
+          });
+          if (res.status === 200) {
+            localStorage.setItem("access", res.data.access);
+            axiosInstance.defaults.headers["Authorization"] = `Bearer ${res.data.access}`;
+            originalRequest.headers["Authorization"] = `Bearer ${res.data.access}`;
+          }
+          return axiosInstance(originalRequest);
+        } catch (refreshError) {
+          console.error("Token refresh failed", refreshError);
+          return Promise.reject(refreshError);
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -110,14 +148,24 @@ const Input = (props) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     // add sender user info if posting to a brand new convo, so that the other user will have access to username, profile pic, etc.
+    // const reqBody = {
+    //   text: event.target.text.value,
+    //   recipientId: otherUser.id,
+    //   conversationId,
+    //   sender: conversationId ? null : user
+    // };
+    // await postMessage(reqBody);
     const reqBody = {
+      conversation: activeChat.conversationId,
       text: event.target.text.value,
-      recipientId: otherUser.id,
-      conversationId,
-      sender: conversationId ? null : user
+      user: activeChat.username
     };
-    await postMessage(reqBody);
-    setText("");
+    try {
+      await axiosInstance.post("/message/create", reqBody);
+      setText("");
+    } catch (error) {
+      console.error("Failed to send message", error.message);
+    }
   };
 
   const handleUpload = async (event) => {
@@ -266,12 +314,14 @@ const Input = (props) => {
   );
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    postMessage: (message) => {
-      dispatch(postMessage(message));
-    }
-  };
-};
+// const mapDispatchToProps = (dispatch) => {
+//   return {
+//     postMessage: (message) => {
+//       dispatch(postMessage(message));
+//     }
+//   };
+// };
 
-export default connect(null, mapDispatchToProps)(Input);
+// export default connect(null, mapDispatchToProps)(Input);
+
+export default Input;

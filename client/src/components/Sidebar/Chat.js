@@ -28,7 +28,6 @@ const Chat = ({ username }) => {
 
   const APIURL = "http://127.0.0.1:8000/messenger/";
 
-  console.log("Chat/activeChat from context: ", activeChat);
   const axiosInstance = axios.create({
     baseURL: APIURL,
     timeout: 5000,
