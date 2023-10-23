@@ -1,15 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Box } from "@material-ui/core";
 import { SenderBubble, OtherUserBubble } from "../ActiveChat";
 import moment from "moment";
+import { ActiveChatContext } from "../../context/activeChat";
 
 const Messages = (props) => {
-  const { messages } = props;
+  // const { messages } = props;
+
+  const { activeChat } = useContext(ActiveChatContext);
 
   return (
     <Box>
-      {messages &&
-        messages.map((message) => {
+      {activeChat.messages &&
+        activeChat.messages.map((message) => {
           const time = moment(message.timestamp).format("h:mm");
           // return message.user_id === userId ? (
           //   <SenderBubble

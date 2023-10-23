@@ -155,7 +155,7 @@ const Input = (props) => {
     try {
       const response = await axiosInstance.post("/message/create", reqBody);
       console.log("input/response: ", response);
-      setActiveChat({ ...activeChat, messages: [response.data.messages] });
+      setActiveChat({ ...activeChat, messages: response.data.messages });
       setText("");
     } catch (error) {
       console.error("Failed to send message", error.message);
