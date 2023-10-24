@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { Grid } from "@material-ui/core";
@@ -7,10 +7,12 @@ import axios from "axios";
 
 import { LeftGrid, RightGrid } from "./Signup";
 import { useStyles } from "./Signup";
+import { ActiveChatContext } from "./context/activeChat";
 
 const Login = (props) => {
   const history = useHistory();
   const { user, login } = props;
+  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLogin = async (event) => {
@@ -26,6 +28,8 @@ const Login = (props) => {
 
       localStorage.setItem("refresh", response.data.refresh);
       localStorage.setItem("access", response.data.access);
+      console.log("login.js/response.data.userId: ", response.data.userId);
+      setActiveChat({ ...activeChat, userId: response.data.userId });
       setIsLoggedIn(true);
     } catch (err) {
       console.error(err.message);

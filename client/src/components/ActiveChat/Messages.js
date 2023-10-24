@@ -14,23 +14,17 @@ const Messages = (props) => {
       {activeChat.messages &&
         activeChat.messages.map((message) => {
           const time = moment(message.timestamp).format("h:mm");
-          // return message.user_id === userId ? (
-          //   <SenderBubble
-          //     key={message.id}
-          //     text={message.text}
-          //     time={time}
-          //     attachments={message.attachments}
-          //   />
-          // ) : (
-          //   <OtherUserBubble
-          //     key={message.id}
-          //     text={message.text}
-          //     time={time}
-          //     otherUser={otherUser}
-          //     attachments={message.attachments}
-          //   />
-          // );
-          return <SenderBubble key={message.id} text={message.text} time={time} />;
+          return message.user_Id == activeChat.userId ? (
+            <SenderBubble key={message.id} text={message.text} time={time} />
+          ) : (
+            <OtherUserBubble
+              key={message.id}
+              text={message.text}
+              time={time}
+              // otherUser={otherUser}
+              // attachments={message.attachments}
+            />
+          );
         })}
     </Box>
   );

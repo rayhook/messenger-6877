@@ -33,13 +33,14 @@ const useStyles = makeStyles(() => ({
 
 const OtherUserBubble = (props) => {
   const classes = useStyles();
-  const { text, time, otherUser } = props;
+  // const { text, time, otherUser } = props;
+  const { text, time } = props;
   return (
     <Box className={classes.root}>
-      <Avatar alt={otherUser.username} src={otherUser.photoUrl} className={classes.avatar}></Avatar>
+      {/* <Avatar  src={otherUser.photoUrl} className={classes.avatar}></Avatar> */}
       <Box>
         <Typography className={classes.usernameDate}>
-          {otherUser.username} {time}
+          {/* {otherUser.username} {time} */}
         </Typography>
         <Box className={classes.bubble}>
           <Typography className={classes.text}>{text}</Typography>

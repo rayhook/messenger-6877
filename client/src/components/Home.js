@@ -8,7 +8,6 @@ import { ActiveChat } from "./ActiveChat";
 import { logout, fetchConversations } from "../store/utils/thunkCreators";
 import { clearOnLogout } from "../store/index";
 import axios from "axios";
-import { ActiveChatProvider } from "../context/activeChat";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -49,17 +48,15 @@ const Home = (props) => {
 
   return (
     <>
-      <ActiveChatProvider>
-        {/* logout button will eventually be in a dropdown next to username */}
-        <Button className={classes.logout} onClick={handleLogout}>
-          Logout
-        </Button>
-        <Grid container component="main" className={classes.root}>
-          <CssBaseline />
-          <SidebarContainer />
-          <ActiveChat />
-        </Grid>
-      </ActiveChatProvider>
+      {/* logout button will eventually be in a dropdown next to username */}
+      <Button className={classes.logout} onClick={handleLogout}>
+        Logout
+      </Button>
+      <Grid container component="main" className={classes.root}>
+        <CssBaseline />
+        <SidebarContainer />
+        <ActiveChat />
+      </Grid>
     </>
   );
 };

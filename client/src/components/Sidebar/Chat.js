@@ -67,6 +67,7 @@ const Chat = ({ username }) => {
       const response = await axiosInstance.post("/conversation/create", { username });
       if (response.status === 201) {
         setActiveChat({
+          ...activeChat,
           username,
           conversationId: response.data.conversation_id
         });

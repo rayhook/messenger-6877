@@ -6,16 +6,19 @@ import store from "./store";
 
 import { theme } from "./themes/theme";
 import Routes from "./routes";
+import { ActiveChatProvider } from "./context/activeChat";
 
 function App() {
   return (
-    <Provider store={store}>
-      <MuiThemeProvider theme={theme}>
-        <BrowserRouter>
-          <Routes />
-        </BrowserRouter>
-      </MuiThemeProvider>
-    </Provider>
+    <ActiveChatProvider>
+      <Provider store={store}>
+        <MuiThemeProvider theme={theme}>
+          <BrowserRouter>
+            <Routes />
+          </BrowserRouter>
+        </MuiThemeProvider>
+      </Provider>
+    </ActiveChatProvider>
   );
 }
 
