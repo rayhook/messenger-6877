@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Chat = ({ username }) => {
+const Chat = ({ convoId }) => {
   const classes = useStyles();
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
@@ -62,29 +62,40 @@ const Chat = ({ username }) => {
     }
   );
 
-  const handleCreateConversation = async () => {
+  const handleGetConversations = async () => {
     try {
-      const response = await axiosInstance.post("/conversation/create", { username });
-      if (response.status === 201) {
-        setActiveChat({
-          ...activeChat,
-          username,
-          conversationId: response.data.conversation_id
-        });
-      }
+      console.log("Chatjs/convoId?:", convoId);
+      const response = await axiosInstance.get("messages/", {
+        params: { conversationId: convoId }
+      });
+      console.log("Chat.js/response.data.messages", response.data.messages);
+      setActiveChat({ ...activeChat, messages: response.data.messages });
     } catch (error) {
-      console.error(error);
+      console.error("Error getting messages", error);
     }
   };
+  // const handleCreateConversation = async () => {
+  //   try {
+  //     const response = await axiosInstance.post("/conversation/create", { username });
+  //     if (response.status === 201) {
+  //       setActiveChat({
+  //         username,
+  //         conversationId: response.data.conversation_id
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   const handleClick = async (conversation) => {
     // await props.setActiveChat(conversation.otherUser.username);
   };
 
   return (
-    <Box className={classes.root} onClick={handleCreateConversation}>
-      <BadgeAvatar username={username} online="true" sidebar={true} />
-      <ChatContent username={username} />
+    <Box className={classes.root} onClick={handleGetConversations}>
+      <BadgeAvatar username={convoId} online="true" sidebar={true} />
+      <ChatContent username={convoId} />
     </Box>
   );
 };

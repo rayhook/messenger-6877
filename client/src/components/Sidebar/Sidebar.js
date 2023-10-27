@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { Search, Chat, CurrentUser } from "./index.js";
 import axios from "axios";
+import { ActiveChatContext } from "../../context/activeChat";
+// import { setActiveChat } from "../../store/activeConversation.js";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -24,6 +26,8 @@ const Sidebar = (props) => {
   const classes = useStyles();
   const [users, setUsers] = useState([]);
   const [convoId, setConvoId] = useState();
+
+  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
   // const conversations = props.conversations || [];
   const { handleChange, searchTerm } = props;
@@ -65,15 +69,25 @@ const Sidebar = (props) => {
   );
 
   useEffect(() => {
-    async function getUsers() {
+    async function fetchConversations() {
       try {
-        const response = await axiosInstance.get("users/");
-        setUsers(response.data.users);
+        const response = await axiosInstance.get("conversations/");
+        const conversations = response.data.conversations;
+        setActiveChat({ ...activeChat, conversations: conversations });
       } catch (error) {
-        console.error("Error fetcheding users", error.message);
+        console.error("Error fetching conversations", error.message);
       }
     }
-    getUsers();
+    fetchConversations();
+    // async function getUsers() {
+    //   try {
+    //     const response = await axiosInstance.get("users/");
+    //     setUsers(response.data.users);
+    //   } catch (error) {
+    //     console.error("Error fetcheding users", error.message);
+    //   }
+    // }
+    // getUsers();
   }, []);
 
   return (
@@ -86,7 +100,9 @@ const Sidebar = (props) => {
         .map((conversation) => {
           return <Chat conversation={conversation} key={conversation.otherUser.username} />;
         })} */}
-      {users && users.map((user) => <Chat key={user.id} username={user.username}></Chat>)}
+      {activeChat.conversations?.map((convo) => (
+        <Chat key={convo.id} convoId={convo.id}></Chat>
+      ))}
     </Box>
   );
 };

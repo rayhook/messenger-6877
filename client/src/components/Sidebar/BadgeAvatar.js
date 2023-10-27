@@ -25,7 +25,7 @@ const useStyles = makeStyles(() => ({
 
 const UserAvatar = (props) => {
   const classes = useStyles();
-  const { sidebar, username, photoUrl, online } = props;
+  const { sidebar, username, online } = props;
 
   return (
     <Box className={sidebar ? classes.sidebar : ""}>
@@ -35,7 +35,7 @@ const UserAvatar = (props) => {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         overlap="circular"
       >
-        <Avatar alt={username} src={photoUrl} className={classes.profilePic}></Avatar>
+        <Avatar className={classes.profilePic}></Avatar>
       </Badge>
     </Box>
   );

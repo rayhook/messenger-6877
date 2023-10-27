@@ -29,8 +29,7 @@ const ChatContent = ({ username }) => {
   return (
     <Box className={classes.root}>
       <Box>
-        <Typography className={classes.username}>{username}</Typography>
-        <Typography className={classes.previewText}>latest chat message</Typography>
+        <Typography>{username}</Typography>
       </Box>
     </Box>
   );
