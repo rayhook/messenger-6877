@@ -34,8 +34,6 @@ const ActiveChat = (props) => {
   const { activeChat } = useContext(ActiveChatContext);
   const conversation = props.conversation || {};
 
-  console.log("Activechat.js/activeChat.messages[0]: ", activeChat);
-
   return (
     <Box className={classes.root}>
       {activeChat && (
