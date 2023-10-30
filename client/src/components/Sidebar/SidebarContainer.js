@@ -9,10 +9,8 @@ const SidebarContainer = (props) => {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleChange = async (event) => {
+  const handleChange = (event) => {
     if (event.target.value === "") {
-      // clear searched convos from redux store
-      clearSearchedUsers();
       setSearchTerm("");
       return;
     }
@@ -21,7 +19,6 @@ const SidebarContainer = (props) => {
       setSearchTerm(event.target.value);
       return;
     }
-    await searchUsers(event.target.value);
     setSearchTerm(event.target.value);
   };
 

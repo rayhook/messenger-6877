@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { Grid, CssBaseline, Button } from "@material-ui/core";
@@ -9,6 +9,7 @@ import { logout, fetchConversations } from "../store/utils/thunkCreators";
 import { clearOnLogout } from "../store/index";
 import axios from "axios";
 import { axiosInstance } from "../API/axiosConfig";
+import { ActiveChatContext } from "../context/activeChat";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,15 +19,15 @@ const useStyles = makeStyles((theme) => ({
 
 const Home = (props) => {
   const classes = useStyles();
-  // const { user, logout, fetchConversations } = props;
   const [users, setUsers] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
   useEffect(() => {
     const fetchUsers = async () => {
       const response = await axiosInstance.get("users/");
       console.log("routes/response.data.users? ", response.data.users);
-      setUsers(response.data.users);
+      setActiveChat({ ...activeChat, users: response.data.users });
     };
     fetchUsers();
   }, []);

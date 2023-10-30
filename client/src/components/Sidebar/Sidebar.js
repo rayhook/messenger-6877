@@ -79,28 +79,25 @@ const Sidebar = (props) => {
       }
     }
     fetchConversations();
-    // async function getUsers() {
-    //   try {
-    //     const response = await axiosInstance.get("users/");
-    //     setUsers(response.data.users);
-    //   } catch (error) {
-    //     console.error("Error fetcheding users", error.message);
-    //   }
-    // }
-    // getUsers();
   }, []);
+
+  const searchResult = activeChat.users.filter((user) => user.username.includes(searchTerm));
+  const conversationWithSearch = activeChat.conversations?.concat(searchResult);
+
+  console.log("Sidebar/conversationWithSearch? ", conversationWithSearch);
+  console.log(
+    "Sidebar/searchResult? ",
+    searchResult,
+    "Sidebar/conversations? ",
+    activeChat.conversations
+  );
 
   return (
     <Box className={classes.root}>
       <CurrentUser />
       <Typography className={classes.title}>Chats</Typography>
       <Search handleChange={handleChange} />
-      {/* {conversations
-        .filter((conversation) => conversation.otherUser.username.includes(searchTerm))
-        .map((conversation) => {
-          return <Chat conversation={conversation} key={conversation.otherUser.username} />;
-        })} */}
-      {activeChat.conversations?.map((convo) => (
+      {conversationWithSearch?.map((convo) => (
         <Chat key={convo.id} convoId={convo.id}></Chat>
       ))}
     </Box>
