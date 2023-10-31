@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
@@ -81,15 +81,25 @@ const Sidebar = (props) => {
     fetchConversations();
   }, []);
 
-  const searchResult = activeChat.users.filter((user) => user.username.includes(searchTerm));
-  const conversationWithSearch = activeChat.conversations?.concat(searchResult);
+  const conversationIncludeSearch = (activeChat.conversations || []).filter((convo) =>
+    convo.username.includes(searchTerm)
+  );
+  const map = new Map();
+  for (let convo of conversationIncludeSearch) {
+    map.set(convo.id);
+  }
+  const uverIncludeSearch = activeChat.users.filter(
+    (user) => user.username.includes(searchTerm) && !map.has(user.id)
+  );
 
-  console.log("Sidebar/conversationWithSearch? ", conversationWithSearch);
+  const conversationUserSearchCombined = conversationIncludeSearch.concat(uverIncludeSearch);
+
+  console.log("Sidebar/conversationUserSearchCombined? ", conversationUserSearchCombined);
   console.log(
-    "Sidebar/searchResult? ",
-    searchResult,
-    "Sidebar/conversations? ",
-    activeChat.conversations
+    "Sidebar/conversationIncludeSearch? ",
+    conversationIncludeSearch,
+    "Sidebar/uverIncludeSearch? ",
+    uverIncludeSearch
   );
 
   return (
@@ -97,9 +107,13 @@ const Sidebar = (props) => {
       <CurrentUser />
       <Typography className={classes.title}>Chats</Typography>
       <Search handleChange={handleChange} />
-      {conversationWithSearch?.map((convo) => (
-        <Chat key={convo.id} convoId={convo.id}></Chat>
-      ))}
+      {searchTerm !== ""
+        ? conversationUserSearchCombined?.map((convo) => (
+            <Chat key={convo.id} username={convo.username} convoId={convo.id}></Chat>
+          ))
+        : activeChat.conversations?.map((convo) => (
+            <Chat key={convo.id} username={convo.username} convoId={convo.id}></Chat>
+          ))}
     </Box>
   );
 };

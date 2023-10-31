@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Chat = ({ convoId }) => {
+const Chat = ({ convoId, username }) => {
   const classes = useStyles();
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
@@ -62,18 +62,7 @@ const Chat = ({ convoId }) => {
     }
   );
 
-  const handleGetConversations = async () => {
-    try {
-      console.log("Chatjs/convoId?:", convoId);
-      const response = await axiosInstance.get("messages/", {
-        params: { conversationId: convoId }
-      });
-      console.log("Chat.js/response.data.messages", response.data.messages);
-      setActiveChat({ ...activeChat, messages: response.data.messages });
-    } catch (error) {
-      console.error("Error getting messages", error);
-    }
-  };
+  const handleGetConversations = async () => {};
   // const handleCreateConversation = async () => {
   //   try {
   //     const response = await axiosInstance.post("/conversation/create", { username });
@@ -95,7 +84,7 @@ const Chat = ({ convoId }) => {
   return (
     <Box className={classes.root} onClick={handleGetConversations}>
       <BadgeAvatar username={convoId} online="true" sidebar={true} />
-      <ChatContent username={convoId} />
+      <ChatContent username={username} />
     </Box>
   );
 };
