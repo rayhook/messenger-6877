@@ -10,15 +10,6 @@ const SidebarContainer = (props) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleChange = (event) => {
-    if (event.target.value === "") {
-      setSearchTerm("");
-      return;
-    }
-    if (searchTerm.includes(event.target.value)) {
-      // if new value is included in search term, we don't need to make another API call, just need to set the search term value so the conversations can be filtered in the rendering
-      setSearchTerm(event.target.value);
-      return;
-    }
     setSearchTerm(event.target.value);
   };
 
