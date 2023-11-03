@@ -16,15 +16,4 @@ const SidebarContainer = (props) => {
   return <Sidebar handleChange={handleChange} searchTerm={searchTerm} />;
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    searchUsers: (username) => {
-      dispatch(searchUsers(username));
-    },
-    clearSearchedUsers: () => {
-      dispatch(clearSearchedUsers());
-    }
-  };
-};
-
-export default connect(null, mapDispatchToProps)(SidebarContainer);
+export default SidebarContainer;

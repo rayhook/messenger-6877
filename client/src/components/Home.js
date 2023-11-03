@@ -65,23 +65,4 @@ const Home = (props) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user,
-    conversations: state.conversations
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    logout: (id) => {
-      dispatch(logout(id));
-      dispatch(clearOnLogout());
-    },
-    fetchConversations: () => {
-      dispatch(fetchConversations());
-    }
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Home);
+export default Home;

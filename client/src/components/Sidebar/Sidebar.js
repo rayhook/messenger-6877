@@ -57,10 +57,4 @@ const Sidebar = (props) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    conversations: state.conversations
-  };
-};
-
-export default connect(mapStateToProps)(Sidebar);
+export default Sidebar;
