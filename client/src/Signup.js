@@ -10,7 +10,6 @@ import {
   makeStyles,
   Typography
 } from "@material-ui/core";
-import { register } from "./store/utils/thunkCreators";
 import sideImg from "./resources/bg-img.png";
 import { ChatIcon } from "./resources/ChatIcon";
 import axios from "axios";
@@ -302,18 +301,4 @@ export const Form = ({ handleAction, classes, formTitle, buttonText, type, Submi
   </Grid>
 );
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    register: (credentials) => {
-      dispatch(register(credentials));
-    }
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default Login;

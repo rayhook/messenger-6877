@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { Grid } from "@material-ui/core";
-import { login } from "./store/utils/thunkCreators";
 import axios from "axios";
 
 import { LeftGrid, RightGrid } from "./Signup";
@@ -59,18 +58,4 @@ const Login = (props) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    login: (credentials) => {
-      dispatch(login(credentials));
-    }
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default Login;
