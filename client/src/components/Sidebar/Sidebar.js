@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useContext, useCallback, useMemo } from "react";
+import React, { useContext } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { Search, Chat, CurrentUser } from "./index.js";
-import axios from "axios";
 import { ActiveChatContext } from "../../context/activeChat";
 import useFilteredConversations from "../../hooks/useFilteredConversations.js";
 import useConversations from "../../hooks/useConversations.js";
@@ -46,7 +45,12 @@ const Sidebar = (props) => {
         <>Loading conversations</>
       ) : (
         filteredConversations?.map((convo) => (
-          <Chat key={convo.id} username={convo.username} convoId={convo.id}></Chat>
+          <Chat
+            key={convo.username || convo.id}
+            username={convo.username}
+            convoId={convo.id}
+            email={convo.email}
+          ></Chat>
         ))
       )}
     </Box>
