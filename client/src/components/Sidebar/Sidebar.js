@@ -1,11 +1,8 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { connect } from "react-redux";
 import { Search, Chat, CurrentUser } from "./index.js";
 import { ActiveChatContext } from "../../context/activeChat";
-import useFilteredConversations from "../../hooks/useFilteredConversations.js";
-import useConversations from "../../hooks/useConversations.js";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -22,37 +19,39 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const Sidebar = (props) => {
+const Sidebar = ({ searchTerm, handleChange, conversations }) => {
   const classes = useStyles();
 
-  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
-  const { handleChange, searchTerm } = props;
+  console.log("Sidebar/conversations ", conversations);
 
-  const { loading } = useConversations();
+  // const filteredConversations = useFilteredConversations(
+  //   searchTerm,
+  //   conversations,
+  //   activeChat.users
+  // );
 
-  const filteredConversations = useFilteredConversations(
-    searchTerm,
-    activeChat.conversations || [],
-    activeChat.users
-  );
+  if (!conversations) {
+    return <>Loading</>;
+  }
+
+  if (conversations.length === 0) {
+    return <>No conversations</>;
+  }
 
   return (
     <Box className={classes.root}>
       <CurrentUser />
       <Typography className={classes.title}>Chats</Typography>
       <Search handleChange={handleChange} />
-      {loading ? (
-        <>Loading conversations</>
-      ) : (
-        filteredConversations?.map((convo) => (
-          <Chat
-            key={convo.username || convo.id}
-            username={convo.username}
-            convoId={convo.id}
-            email={convo.email}
-          ></Chat>
-        ))
-      )}
+
+      {conversations.map((convo) => (
+        <Chat
+          key={convo.username || convo.id}
+          username={convo.username}
+          convoId={convo.id}
+          email={convo.email}
+        ></Chat>
+      ))}
     </Box>
   );
 };

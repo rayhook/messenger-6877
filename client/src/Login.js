@@ -27,8 +27,8 @@ const Login = (props) => {
 
       localStorage.setItem("refresh", response.data.refresh);
       localStorage.setItem("access", response.data.access);
-      console.log("login.js/response.data.userId: ", response.data.userId);
-      setActiveChat({ ...activeChat, userId: response.data.userId });
+      setActiveChat((prevActiveChat) => ({ ...prevActiveChat, userId: response.data.userId }));
+      console.log("Login/activeChat.conversations: ", activeChat.conversations);
       setIsLoggedIn(true);
     } catch (err) {
       console.error(err.message);
