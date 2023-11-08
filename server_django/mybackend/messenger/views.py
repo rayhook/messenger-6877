@@ -26,11 +26,31 @@ def Homepage(request):
     return HttpResponse("Welcome to the messenger app homepage")
 
 
-class ConversationsView(View):
+class ConversationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        conversations = Conversations.objects.all()
-        response = {"conversations": list(conversations.values())}
-        return JsonResponse(response)
+        try:
+            logging.info(f"username is simpley? {request.user.username}")
+            current_user_profile = UserProfile.objects.get(user=request.user)
+            conversations = Conversations.objects.filter(user=current_user_profile)
+        except UserProfile.DoesNotExist:
+            logging.error(f"UserProfile doesnt not exist: {request.user}")
+            return Response(
+                {"error": "UserProfile doesnt exist"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Conversations.DoesNotExist:
+            logging.error(
+                f"No conversations found for user profile: {current_user_profile}"
+            )
+            return Response(
+                {"error": "No conversations found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(
+            {"conversations": list(conversations.values())}, status=status.HTTP_200_OK
+        )
 
 
 class RegisterView(APIView):
