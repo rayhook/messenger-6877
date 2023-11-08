@@ -16,7 +16,6 @@ const useStyles = makeStyles((theme) => ({
 
 const Home = (props) => {
   const classes = useStyles();
-  const [users, setUsers] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
