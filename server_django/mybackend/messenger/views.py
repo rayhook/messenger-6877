@@ -40,6 +40,7 @@ class ConversationsView(APIView):
                 conversation_with_username.append(
                     {
                         "id": convo.id,
+                        "user_id": convo.user.user.id,
                         "username": convo.user.user.username,
                         "timestamp": convo.timestamp,
                     }
