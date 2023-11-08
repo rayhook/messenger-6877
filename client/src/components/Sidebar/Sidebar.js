@@ -19,24 +19,11 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const Sidebar = ({ searchTerm, handleChange, conversations }) => {
+const Sidebar = ({ handleChange, filteredConversations }) => {
   const classes = useStyles();
+  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
-  console.log("Sidebar/conversations ", conversations);
-
-  // const filteredConversations = useFilteredConversations(
-  //   searchTerm,
-  //   conversations,
-  //   activeChat.users
-  // );
-
-  if (!conversations) {
-    return <>Loading</>;
-  }
-
-  if (conversations.length === 0) {
-    return <>No conversations</>;
-  }
+  console.log("Sidebar/filteredConversations ", filteredConversations);
 
   return (
     <Box className={classes.root}>
@@ -44,7 +31,7 @@ const Sidebar = ({ searchTerm, handleChange, conversations }) => {
       <Typography className={classes.title}>Chats</Typography>
       <Search handleChange={handleChange} />
 
-      {conversations.map((convo) => (
+      {filteredConversations.map((convo) => (
         <Chat
           key={convo.username || convo.id}
           username={convo.username}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Sidebar } from "./index";
 import { axiosInstance } from "../../API/axiosConfig";
 import { ActiveChatContext } from "../../context/activeChat";
+import useFilteredConversations from "../../hooks/useFilteredConversations.js";
 
 const SidebarContainer = (props) => {
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
@@ -28,17 +29,25 @@ const SidebarContainer = (props) => {
     setSearchTerm(event.target.value);
   };
 
+  const filteredConversations = useFilteredConversations(
+    searchTerm,
+    activeChat.conversations,
+    activeChat.users
+  );
+
+  if (!activeChat.conversations) {
+    return <>Loading</>;
+  }
+
+  if (activeChat.conversations.length === 0) {
+    return <>No conversations</>;
+  }
+
   if (isLoading) {
     return <>Loading...</>;
   }
 
-  return (
-    <Sidebar
-      handleChange={handleChange}
-      searchTerm={searchTerm}
-      conversations={activeChat.conversations}
-    />
-  );
+  return <Sidebar handleChange={handleChange} filteredConversations={filteredConversations} />;
 };
 
 export default SidebarContainer;
