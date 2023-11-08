@@ -33,7 +33,7 @@ const Sidebar = ({ handleChange, filteredConversations }) => {
 
       {filteredConversations.map((convo) => (
         <Chat
-          key={convo.username || convo.id}
+          key={convo.username}
           username={convo.username}
           convoId={convo.id}
           email={convo.email}

@@ -6,7 +6,7 @@ const useFilteredConversations = (searchTerm, conversations, users) => {
 
     const conversationMap = new Map();
     for (let convo of conversations) {
-      conversationMap.set(convo.id);
+      conversationMap.set(convo.user_id);
     }
     const filteredConversations = (conversations || []).filter((convo) =>
       convo.username.includes(searchTerm)
