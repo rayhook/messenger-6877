@@ -31,9 +31,19 @@ class ConversationsView(APIView):
 
     def get(self, request):
         try:
-            logging.info(f"username is simpley? {request.user.username}")
             current_user_profile = UserProfile.objects.get(user=request.user)
-            conversations = Conversations.objects.filter(user=current_user_profile)
+            conversations = Conversations.objects.filter(
+                user=current_user_profile
+            ).prefetch_related("user__user")
+            conversation_with_username = []
+            for convo in conversations:
+                conversation_with_username.append(
+                    {
+                        "id": convo.id,
+                        "username": convo.user.user.username,
+                        "timestamp": convo.timestamp,
+                    }
+                )
         except UserProfile.DoesNotExist:
             logging.error(f"UserProfile doesnt not exist: {request.user}")
             return Response(
@@ -49,7 +59,7 @@ class ConversationsView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
         return Response(
-            {"conversations": list(conversations.values())}, status=status.HTTP_200_OK
+            {"conversations": conversation_with_username}, status=status.HTTP_200_OK
         )
 
 
