@@ -146,9 +146,12 @@ class UsersView(APIView):
     def get(self, request):
         try:
             users_list = User.objects.all()
-            return Response(
-                {"users": list(users_list.values())}, status=status.HTTP_200_OK
-            )
+            users_list_cleaned = []
+            for user in users_list:
+                users_list_cleaned.append(
+                    {"id": user.id, "username": user.username, "email": user.email}
+                )
+            return Response({"users": users_list_cleaned}, status=status.HTTP_200_OK)
         except:
             return Response(
                 {"error": "failed to get users_list"},

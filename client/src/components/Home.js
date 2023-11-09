@@ -22,7 +22,7 @@ const Home = (props) => {
   useEffect(() => {
     const fetchUsers = async () => {
       const response = await axiosInstance.get("users/");
-      console.log("routes/response.data.users? ", response.data.users);
+      console.log("Home/users? ", response.data.users);
       setActiveChat((prevActiveChat) => ({ ...prevActiveChat, users: response.data.users }));
       console.log("Home/Conversations ", activeChat.conversations);
     };
