@@ -11,7 +11,15 @@ class UserProfile(models.Model):
 
 
 class Conversations(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        UserProfile, related_name="user_conversations", on_delete=models.CASCADE
+    )
+    other_user = models.ForeignKey(
+        UserProfile,
+        related_name="other_user_conversations",
+        on_delete=models.CASCADE,
+        null=True,
+    )
     timestamp = models.DateTimeField(auto_now=True, auto_now_add=False)
 
 
