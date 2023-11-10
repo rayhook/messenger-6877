@@ -2,7 +2,6 @@ import React, { useContext, useEffect } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Search, Chat, CurrentUser } from "./index.js";
-import { ActiveChatContext } from "../../context/activeChat";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -21,9 +20,6 @@ const useStyles = makeStyles(() => ({
 
 const Sidebar = ({ handleChange, filteredConversations }) => {
   const classes = useStyles();
-  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
-
-  console.log("Sidebar/filteredConversations ", filteredConversations);
 
   return (
     <Box className={classes.root}>
@@ -33,10 +29,12 @@ const Sidebar = ({ handleChange, filteredConversations }) => {
 
       {filteredConversations.map((convo) => (
         <Chat
-          key={convo.username}
-          username={convo.username}
+          key={convo.id}
+          convouser={convo.user}
+          userId={convo.id}
           convoId={convo.id}
-          email={convo.email}
+          username={convo.username}
+          otherUser={convo.otheruser}
         ></Chat>
       ))}
     </Box>

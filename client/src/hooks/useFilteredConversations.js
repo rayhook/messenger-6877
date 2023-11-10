@@ -5,10 +5,11 @@ const useFilteredConversations = (searchTerm, conversations, users) => {
     if (!searchTerm) return conversations;
 
     const conversationMap = new Map();
+
     for (let convo of conversations) {
       conversationMap.set(convo.user_id);
     }
-    const filteredConversations = (conversations || []).filter((convo) =>
+    const filteredConversations = conversations.filter((convo) =>
       convo.username.includes(searchTerm)
     );
 
@@ -16,7 +17,14 @@ const useFilteredConversations = (searchTerm, conversations, users) => {
       (user) => user.username.includes(searchTerm) && !conversationMap.has(user.id)
     );
 
-    console.log("FilteredConversations?", [...filteredConversations, ...usersNotInConversations]);
+    console.log(
+      "userfilteredConversations/conversations? ",
+      conversations,
+      "filteredConversations? ",
+      filteredConversations,
+      "usersNotInConversations? ",
+      usersNotInConversations
+    );
     return [...filteredConversations, ...usersNotInConversations];
   }, [searchTerm, conversations, users]);
 };

@@ -21,32 +21,28 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Chat = ({ convoId, username, email }) => {
+const Chat = ({ convoId, username, convouser, userId, otheruser }) => {
   const classes = useStyles();
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
   const handleSelectConversation = async () => {
-    try {
-      if (!email) {
-        setActiveChat({
-          ...activeChat,
-          conversationId: convoId
+    if (!otheruser) {
+      try {
+        const response = await axiosInstance.post("conversation/create", {
+          userId
         });
-      } else {
-        try {
-          const response = await axiosInstance.post("conversation/create");
-          if (response.status === 201) {
-            setActiveChat({
-              ...activeChat,
-              conversationId: response.data.conversation_id
-            });
-          }
-        } catch (error) {
-          console.error("failed to create a conversation", error);
+        if (response.status === 201) {
+          setActiveChat((prevState) => ({
+            ...prevState,
+            conversations: response.data.conversations,
+            conversationId: response.data.conversation_id
+          }));
         }
+      } catch (error) {
+        console.error("failed to create a conversation", error);
       }
-    } catch (error) {
-      console.error(error);
+    } else {
+      setActiveChat((prevState) => ({ ...prevState, conversationId: convoId }));
     }
   };
 

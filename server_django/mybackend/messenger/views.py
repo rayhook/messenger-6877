@@ -22,48 +22,6 @@ JWT_authenticator = JWTAuthentication()
 logger = logging.getLogger(__name__)
 
 
-def Homepage(request):
-    return HttpResponse("Welcome to the messenger app homepage")
-
-
-class ConversationsView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        try:
-            current_user_profile = UserProfile.objects.get(user=request.user)
-            conversations = Conversations.objects.filter(
-                user=current_user_profile
-            ).prefetch_related("user__user")
-            conversation_with_username = []
-            for convo in conversations:
-                conversation_with_username.append(
-                    {
-                        "id": convo.id,
-                        "user_id": convo.user.user.id,
-                        "username": convo.user.user.username,
-                        "timestamp": convo.timestamp,
-                    }
-                )
-        except UserProfile.DoesNotExist:
-            logging.error(f"UserProfile doesnt not exist: {request.user}")
-            return Response(
-                {"error": "UserProfile doesnt exist"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Conversations.DoesNotExist:
-            logging.error(
-                f"No conversations found for user profile: {current_user_profile}"
-            )
-            return Response(
-                {"error": "No conversations found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        return Response(
-            {"conversations": conversation_with_username}, status=status.HTTP_200_OK
-        )
-
-
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -164,10 +122,26 @@ class ConversationCreateView(APIView):
 
     def post(self, request):
         try:
+            other_user_id = request.data.get("userId")
+            logging.info(f"other_user_id? {other_user_id}")
+            other_user = User.objects.get(id=other_user_id)
+            logging.info(f"other_user? {other_user }")
+            other_user_profile = UserProfile.objects.get(user=other_user)
+            logging.info(f"other_user_profile? {other_user_profile}")
             user_profile = UserProfile.objects.get(user=request.user)
-            conversation = Conversations.objects.create(user=user_profile)
+            logging.info(f"user_profile? {other_user_id}")
+            conversation = Conversations.objects.create(
+                user=user_profile, other_user=other_user_profile
+            )
+            conversations = Conversations.objects.filter(user=user_profile)
+            logging.info(f"conversations? {list(Conversations.values())}")
+
             return Response(
-                {"conversation_id": conversation.id}, status=status.HTTP_201_CREATED
+                {
+                    "conversations": list(conversations.values()),
+                    "conversation_id": conversation.id,
+                },
+                status=status.HTTP_201_CREATED,
             )
         except Exception as e:
             logging.error(f"Error creating conversation: {e}")
@@ -175,6 +149,44 @@ class ConversationCreateView(APIView):
                 {"error": "failed to get conversation_id"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class ConversationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            current_user_profile = UserProfile.objects.get(user=request.user)
+            conversations = Conversations.objects.filter(
+                user=current_user_profile
+            ).prefetch_related("user__user")
+            conversation_with_username = []
+            for convo in conversations:
+                conversation_with_username.append(
+                    {
+                        "id": convo.id,
+                        "user_id": convo.user.user.id,
+                        "username": convo.user.user.username,
+                        "timestamp": convo.timestamp,
+                    }
+                )
+        except UserProfile.DoesNotExist:
+            logging.error(f"UserProfile doesnt not exist: {request.user}")
+            return Response(
+                {"error": "UserProfile doesnt exist"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Conversations.DoesNotExist:
+            logging.error(
+                f"No conversations found for user profile: {current_user_profile}"
+            )
+            return Response(
+                {"error": "No conversations found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(
+            {"conversations": conversation_with_username}, status=status.HTTP_200_OK
+        )
 
 
 class MessageCreateView(APIView):

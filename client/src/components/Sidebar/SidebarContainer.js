@@ -35,13 +35,15 @@ const SidebarContainer = (props) => {
     activeChat.users
   );
 
+  console.log("Sidebar/filteredConversations?", filteredConversations);
+
   if (!activeChat.conversations) {
     return <>Loading</>;
   }
 
-  if (activeChat.conversations.length === 0) {
-    return <>No conversations</>;
-  }
+  // if (activeChat.conversations.length === 0) {
+  //   return <>No conversations</>;
+  // }
 
   if (isLoading) {
     return <>Loading...</>;
