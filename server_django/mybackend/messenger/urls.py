@@ -16,6 +16,11 @@ urlpatterns = [
         name="conversation_create",
     ),
     path("message/create", views.MessageCreateView.as_view(), name="message_create"),
+    path(
+        "search/",
+        views.SearchView.as_view(),
+        name="search",
+    ),
     path("conversations/", views.ConversationsView.as_view(), name="conversations"),
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.LoginView.as_view(), name="login"),

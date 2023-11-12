@@ -4,14 +4,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.http import HttpResponse, JsonResponse
-from django.views import View
+from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.http import Http404
-
+from rest_framework.exceptions import NotFound
+from django.db.models import Q
 
 from messenger.models import Conversations, UserProfile, Messages
 import logging
@@ -104,12 +104,14 @@ class UsersView(APIView):
     def get(self, request):
         try:
             users_list = User.objects.all()
-            users_list_cleaned = []
+            users_list_password_removed = []
             for user in users_list:
-                users_list_cleaned.append(
+                users_list_password_removed.append(
                     {"id": user.id, "username": user.username, "email": user.email}
                 )
-            return Response({"users": users_list_cleaned}, status=status.HTTP_200_OK)
+            return Response(
+                {"users": users_list_password_removed}, status=status.HTTP_200_OK
+            )
         except:
             return Response(
                 {"error": "failed to get users_list"},
@@ -123,13 +125,11 @@ class ConversationCreateView(APIView):
     def post(self, request):
         try:
             other_user_id = request.data.get("userId")
-            logging.info(f"other_user_id? {other_user_id}")
+
             other_user = User.objects.get(id=other_user_id)
-            logging.info(f"other_user? {other_user }")
             other_user_profile = UserProfile.objects.get(user=other_user)
-            logging.info(f"other_user_profile? {other_user_profile}")
+
             user_profile = UserProfile.objects.get(user=request.user)
-            logging.info(f"user_profile? {other_user_id}")
             conversation = Conversations.objects.create(
                 user=user_profile, other_user=other_user_profile
             )
@@ -149,6 +149,72 @@ class ConversationCreateView(APIView):
                 {"error": "failed to get conversation_id"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class SearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        search_term = request.query_params.get("search", "")
+
+        if search_term == "":
+            conversation_list = Conversations.objects.filter(
+                user=request.user.userprofile
+            ).values("id", "other_user__user__username", "timestamp")
+
+            conversation_list_serialized = [
+                {
+                    "id": convo["id"],
+                    "other_user": convo["other_user__user__username"],
+                    "timestamp": convo["timestamp"],
+                    "type": "conversation",
+                }
+                for convo in conversation_list
+            ]
+            return Response({"conversations_filtered": conversation_list_serialized})
+
+        # conversations username that includes the search term
+        conversation_filtered = Conversations.objects.filter(
+            Q(other_user__user__username__icontains=search_term),
+            user=request.user.userprofile,
+        ).select_related("other_user__user")
+
+        conversation_filtered_serialized = [
+            {
+                "id": "convo" + str(convo.id),
+                "other_user": convo.other_user,
+                "timestammp": convo.timestamp,
+                "type": "user",
+            }
+            for convo in conversation_filtered
+        ]
+
+        conversation_ids_filtered = conversation_filtered.values_list(
+            "other_user__user_id", flat=True
+        )
+
+        users_not_in_conversation = User.objects.exclude(
+            id__in=conversation_ids_filtered
+        ).filter(username__icontains=search_term)
+
+        users_not_in_conversation_filtered_serialized = [
+            {
+                "id": "user" + str(user.id),
+                "other_user": user.username,
+                "type": "user",
+            }
+            for user in users_not_in_conversation
+        ]
+
+        filtered_users_and_conversations = (
+            conversation_filtered_serialized
+            + users_not_in_conversation_filtered_serialized
+        )
+
+        return Response(
+            {"conversations_filtered": filtered_users_and_conversations},
+            status=status.HTTP_200_OK,
+        )
 
 
 class ConversationsView(APIView):
@@ -187,6 +253,11 @@ class ConversationsView(APIView):
         return Response(
             {"conversations": conversation_with_username}, status=status.HTTP_200_OK
         )
+
+
+# class ConversationUserView(APIView):
+#     def get(self, request):
+#         filtered_conversation =
 
 
 class MessageCreateView(APIView):
