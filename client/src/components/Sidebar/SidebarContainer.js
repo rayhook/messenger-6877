@@ -13,29 +13,21 @@ const SidebarContainer = (props) => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await axiosInstance.get("conversations/");
-        const conversations = response.data.conversations;
+        const response = await axiosInstance.get(`search/?search=${searchTerm}`);
+        const conversations = response.data.conversations_filtered;
+        console.log("SidebarContainer/conversations? ", conversations);
         setActiveChat((prevState) => ({ ...prevState, conversations: conversations }));
-        console.log("SidebarContainer/activeChat.conversations? ", activeChat.conversations);
       } catch (error) {
         console.error("Error fetching conversations", error.message);
       }
       setIsLoading(false);
     };
     fetchData();
-  }, []);
+  }, [searchTerm]);
 
   const handleChange = (event) => {
     setSearchTerm(event.target.value);
   };
-
-  const filteredConversations = useFilteredConversations(
-    searchTerm,
-    activeChat.conversations,
-    activeChat.users
-  );
-
-  console.log("Sidebar/filteredConversations?", filteredConversations);
 
   if (!activeChat.conversations) {
     return <>Loading</>;
@@ -49,7 +41,7 @@ const SidebarContainer = (props) => {
     return <>Loading...</>;
   }
 
-  return <Sidebar handleChange={handleChange} filteredConversations={filteredConversations} />;
+  return <Sidebar handleChange={handleChange} conversations={activeChat.conversations} />;
 };
 
 export default SidebarContainer;

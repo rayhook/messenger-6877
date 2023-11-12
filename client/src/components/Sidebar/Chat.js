@@ -21,35 +21,31 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Chat = ({ convoId, username, convouser, userId, otheruser }) => {
+const Chat = ({ userId, otherUser }) => {
   const classes = useStyles();
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
   const handleSelectConversation = async () => {
-    if (!otheruser) {
-      try {
-        const response = await axiosInstance.post("conversation/create", {
-          userId
-        });
-        if (response.status === 201) {
-          setActiveChat((prevState) => ({
-            ...prevState,
-            conversations: response.data.conversations,
-            conversationId: response.data.conversation_id
-          }));
-        }
-      } catch (error) {
-        console.error("failed to create a conversation", error);
+    try {
+      const response = await axiosInstance.post("conversation/create", {
+        userId
+      });
+      if (response.status === 201) {
+        setActiveChat((prevState) => ({
+          ...prevState,
+          conversations: response.data.conversations,
+          conversationId: response.data.conversation_id
+        }));
       }
-    } else {
-      setActiveChat((prevState) => ({ ...prevState, conversationId: convoId }));
+    } catch (error) {
+      console.error("failed to create a conversation", error);
     }
   };
 
   return (
     <Box className={classes.root} onClick={handleSelectConversation}>
-      <BadgeAvatar username={convoId} online="true" sidebar={true} />
-      <ChatContent username={username} />
+      <BadgeAvatar username={otherUser} online="true" sidebar={true} />
+      <ChatContent username={otherUser} />
     </Box>
   );
 };

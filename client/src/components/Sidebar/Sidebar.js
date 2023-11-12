@@ -18,7 +18,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const Sidebar = ({ handleChange, filteredConversations }) => {
+const Sidebar = ({ handleChange, filteredConversations, conversations }) => {
   const classes = useStyles();
 
   return (
@@ -27,16 +27,14 @@ const Sidebar = ({ handleChange, filteredConversations }) => {
       <Typography className={classes.title}>Chats</Typography>
       <Search handleChange={handleChange} />
 
-      {filteredConversations.map((convo) => (
-        <Chat
-          key={convo.id}
-          convouser={convo.user}
-          userId={convo.id}
-          convoId={convo.id}
-          username={convo.username}
-          otherUser={convo.otheruser}
-        ></Chat>
-      ))}
+      {conversations.map((convo) => {
+        if (convo.type === "conversation") {
+          console.log("convo.other_user", convo.other_user);
+          return <Chat key={convo.id} otherUser={convo.other_user}></Chat>;
+        } else {
+          return <Chat key={convo.id} userId={convo.id} otherUser={convo.other_user}></Chat>;
+        }
+      })}
     </Box>
   );
 };
