@@ -155,64 +155,45 @@ class SearchView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        search_term = request.query_params.get("search", "")
+        search_query = request.query_params.get("search", "")
 
-        if search_term == "":
-            conversation_list = Conversations.objects.filter(
-                user=request.user.userprofile
-            ).values("id", "other_user__user__username", "timestamp")
-
-            conversation_list_serialized = [
-                {
-                    "id": convo["id"],
-                    "other_user": convo["other_user__user__username"],
-                    "timestamp": convo["timestamp"],
-                    "type": "conversation",
-                }
-                for convo in conversation_list
+        if search_query:
+            current_user_profile = request.user.userprofile
+            # all users that their username contains the search query
+            users = UserProfile.objects.filter(user__username__icontains=search_query)
+            # conversations between current user and in users (users are filtered to contain search query)
+            conversations = Conversations.filter(
+                Q(user=current_user_profile, other_user__in=users)
+                | Q(other_user=current_user_profile, user__in=users)
+            ).distinct()
+            existing_contact_ids = [c.user.id for c in conversations] + [
+                c.other_user.id for c in conversations
             ]
-            return Response({"conversations_filtered": conversation_list_serialized})
 
-        # conversations username that includes the search term
-        conversation_filtered = Conversations.objects.filter(
-            Q(other_user__user__username__icontains=search_term),
-            user=request.user.userprofile,
-        ).select_related("other_user__user")
+            new_contacts = UserProfile.objects.exclude(
+                id__in=existing_contact_ids
+            ).filter(user__username__icontains=search_query)
 
-        conversation_filtered_serialized = [
+        else:
+            conversations = Conversations.filter(
+                Q(user=current_user_profile) | Q(other_user=current_user_profile)
+            ).distinct()
+        conversation_list = [
             {
-                "id": "convo" + str(convo.id),
-                "other_user": convo.other_user,
-                "timestammp": convo.timestamp,
-                "type": "user",
+                "id": conversation.id,
+                "with_user": conversation.other_user.user.username
+                if conversation.user == current_user_profile
+                else conversation.user.user.username,
+                "last_message": Messages.objects.filter(conversation=conversation)
+                .latest("timestamp")
+                .text,
+                "timestamp": conversation.timestamp,
             }
-            for convo in conversation_filtered
+            for conversation in conversations
         ]
-
-        conversation_ids_filtered = conversation_filtered.values_list(
-            "other_user__user_id", flat=True
-        )
-
-        users_not_in_conversation = User.objects.exclude(
-            id__in=conversation_ids_filtered
-        ).filter(username__icontains=search_term)
-
-        users_not_in_conversation_filtered_serialized = [
-            {
-                "id": "user" + str(user.id),
-                "other_user": user.username,
-                "type": "user",
-            }
-            for user in users_not_in_conversation
-        ]
-
-        filtered_users_and_conversations = (
-            conversation_filtered_serialized
-            + users_not_in_conversation_filtered_serialized
-        )
 
         return Response(
-            {"conversations_filtered": filtered_users_and_conversations},
+            {"conversation_list": conversation_list, "new_contacts": new_contacts},
             status=status.HTTP_200_OK,
         )
 
