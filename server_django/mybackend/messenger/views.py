@@ -5,11 +5,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.http import Http404
 from rest_framework.exceptions import NotFound
 from django.db.models import Q
 
@@ -123,30 +122,20 @@ class ConversationCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        other_user_username = request.data.get("otherUser")
+        user = get_object_or_404(User, username=other_user_username)
+        other_user_user_profile = get_object_or_404(UserProfile, user=user)
         try:
-            other_user_id = request.data.get("userId")
-
-            other_user = User.objects.get(id=other_user_id)
-            other_user_profile = UserProfile.objects.get(user=other_user)
-
-            user_profile = UserProfile.objects.get(user=request.user)
             conversation = Conversations.objects.create(
-                user=user_profile, other_user=other_user_profile
+                user=request.user.userprofile, other_user=other_user_user_profile
             )
-            conversations = Conversations.objects.filter(user=user_profile)
-            logging.info(f"conversations? {list(Conversations.values())}")
-
             return Response(
-                {
-                    "conversations": list(conversations.values()),
-                    "conversation_id": conversation.id,
-                },
-                status=status.HTTP_201_CREATED,
+                {"conversation_id": conversation.id}, status=status.HTTP_201_CREATED
             )
         except Exception as e:
-            logging.error(f"Error creating conversation: {e}")
+            logger.error(f"Error creating a conversation: {e}")
             return Response(
-                {"error": "failed to get conversation_id"},
+                {"error": "an error occured while creating the conversation"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -156,13 +145,14 @@ class SearchView(APIView):
 
     def get(self, request):
         search_query = request.query_params.get("search", "")
+        current_user_profile = request.user.userprofile
+        conversations, new_contacts, new_contact_list = [], [], []
 
         if search_query:
-            current_user_profile = request.user.userprofile
             # all users that their username contains the search query
             users = UserProfile.objects.filter(user__username__icontains=search_query)
             # conversations between current user and in users (users are filtered to contain search query)
-            conversations = Conversations.filter(
+            conversations = Conversations.objects.filter(
                 Q(user=current_user_profile, other_user__in=users)
                 | Q(other_user=current_user_profile, user__in=users)
             ).distinct()
@@ -174,26 +164,29 @@ class SearchView(APIView):
                 id__in=existing_contact_ids
             ).filter(user__username__icontains=search_query)
 
+            new_contact_list = [
+                {"id": contact.id, "with_user": contact.user.username}
+                for contact in new_contacts
+            ]
+
         else:
-            conversations = Conversations.filter(
+            conversations = Conversations.objects.filter(
                 Q(user=current_user_profile) | Q(other_user=current_user_profile)
             ).distinct()
+
         conversation_list = [
             {
                 "id": conversation.id,
                 "with_user": conversation.other_user.user.username
                 if conversation.user == current_user_profile
                 else conversation.user.user.username,
-                "last_message": Messages.objects.filter(conversation=conversation)
-                .latest("timestamp")
-                .text,
                 "timestamp": conversation.timestamp,
             }
             for conversation in conversations
         ]
 
         return Response(
-            {"conversation_list": conversation_list, "new_contacts": new_contacts},
+            {"conversation_list": conversation_list, "new_contacts": new_contact_list},
             status=status.HTTP_200_OK,
         )
 
