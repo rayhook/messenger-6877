@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Sidebar } from "./index";
 import { axiosInstance } from "../../API/axiosConfig";
 import { ActiveChatContext } from "../../context/activeChat";
-import useFilteredConversations from "../../hooks/useFilteredConversations.js";
+import axios from "axios";
 
 const SidebarContainer = (props) => {
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
@@ -14,19 +14,56 @@ const SidebarContainer = (props) => {
       setIsLoading(true);
       try {
         const response = await axiosInstance.get(`search/?search=${searchTerm}`);
-        const conversations = response.data.conversations_filtered;
-        console.log("SidebarContainer/conversations? ", conversations);
-        setActiveChat((prevState) => ({ ...prevState, conversations: conversations }));
+        const conversations = response.data;
+        console.log("SidebarContainer/conversation_list ", conversations.conversation_list);
+        console.log("SidebarContainer/new_contacts ", conversations.new_contacts);
+        setActiveChat((prevState) => ({
+          ...prevState,
+          conversations: conversations.conversation_list,
+          newContacts: conversations.new_contacts
+        }));
       } catch (error) {
         console.error("Error fetching conversations", error.message);
       }
       setIsLoading(false);
     };
     fetchData();
-  }, [searchTerm]);
+  }, []);
 
-  const handleChange = (event) => {
+  const handleChange = async (event) => {
     setSearchTerm(event.target.value);
+    try {
+      const response = await axiosInstance.get(`search/?search=${event.target.value}`);
+      const conversations = response.data;
+      console.log("SidebarContainer/conversation_list ", conversations.conversation_list);
+      console.log("SidebarContainer/new_contacts ", conversations.new_contacts);
+      setActiveChat((prevState) => ({
+        ...prevState,
+        conversations: conversations.conversation_list,
+        newContacts: conversations.new_contacts
+      }));
+    } catch (error) {
+      console.error("Error fetching conversations", error.message);
+    }
+  };
+
+  const handleSelectChat = async (id, otherUser) => {
+    console.log("handleSelectChat triggered!");
+    const prefix = id.slice(0, 4);
+    const idValue = Number(id.slice(6));
+    if (prefix === "conv") {
+      console.log("handleSectioChar-convo", idValue);
+      setActiveChat((prevState) => ({ ...prevState, conversationId: idValue }));
+    } else {
+      console.log("handleSectioChar-newc_user");
+      try {
+        const response = await axiosInstance.post("/conversation/create", { otherUser });
+        const conversationId = response.conversation_id;
+        setActiveChat((prevState) => ({ ...prevState, conversationId }));
+      } catch (error) {
+        console.error(`error creating conversation ${error.message}`);
+      }
+    }
   };
 
   if (!activeChat.conversations) {
@@ -41,7 +78,15 @@ const SidebarContainer = (props) => {
     return <>Loading...</>;
   }
 
-  return <Sidebar handleChange={handleChange} conversations={activeChat.conversations} />;
+  return (
+    <Sidebar
+      handleChange={handleChange}
+      conversations={activeChat.conversations}
+      newContacts={activeChat.newContacts}
+      searchTerm={searchTerm}
+      handleSelectChat={handleSelectChat}
+    />
+  );
 };
 
 export default SidebarContainer;

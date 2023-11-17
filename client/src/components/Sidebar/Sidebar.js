@@ -1,4 +1,3 @@
-import React, { useContext, useEffect } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { Search, Chat, CurrentUser } from "./index.js";
@@ -18,23 +17,35 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const Sidebar = ({ handleChange, filteredConversations, conversations }) => {
+const Sidebar = ({ handleChange, conversations, newContacts, searchTerm, handleSelectChat }) => {
   const classes = useStyles();
 
   return (
     <Box className={classes.root}>
       <CurrentUser />
       <Typography className={classes.title}>Chats</Typography>
-      <Search handleChange={handleChange} />
+      <Search handleChange={handleChange} searchTerm={searchTerm} />
 
-      {conversations.map((convo) => {
-        if (convo.type === "conversation") {
-          console.log("convo.other_user", convo.other_user);
-          return <Chat key={convo.id} otherUser={convo.other_user}></Chat>;
-        } else {
-          return <Chat key={convo.id} userId={convo.id} otherUser={convo.other_user}></Chat>;
-        }
-      })}
+      {searchTerm === ""
+        ? conversations.map((convo) => (
+            <Chat
+              key={`convo-${convo.id}`}
+              otherUser={convo.with_user}
+              id={`convo-${convo.id}`}
+              handleSelectChat={handleSelectChat}
+            ></Chat>
+          ))
+        : [
+            ...conversations.map((convo) => ({ ...convo, id: `convo-${convo.id}` })),
+            ...newContacts.map((contact) => ({ ...contact, id: `contact-${contact.id}` }))
+          ].map((chat) => (
+            <Chat
+              key={chat.id}
+              otherUser={chat.with_user}
+              id={chat.id}
+              handleSelectChat={handleSelectChat}
+            ></Chat>
+          ))}
     </Box>
   );
 };
