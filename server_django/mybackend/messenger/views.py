@@ -229,72 +229,40 @@ class ConversationsView(APIView):
         )
 
 
-# class ConversationUserView(APIView):
-#     def get(self, request):
-#         filtered_conversation =
-
-
 class MessageCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         logger.info(f"MessageCreateView/request.data {request.data}")
 
-        username = request.data.get("username")
         conversation_id = request.data.get("conversation")
         text = request.data.get("text")
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return JsonResponse(
-                {"error": "User with given username does not exist."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            user_profile = UserProfile.objects.get(user=user)
-        except User.DoesNotExist:
-            return JsonResponse(
-                {"error": "UserProfile with given username does not exist."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        user_profile = request.user.userprofile
 
-        try:
-            conversation = Conversations.objects.get(id=conversation_id)
-        except Conversations.DoesNotExist:
-            return JsonResponse(
-                {"error": "Conversation with given ID does not exist."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        conversation = Conversations.objects.get(id=conversation_id)
 
         try:
             Messages.objects.create(
                 conversation=conversation, text=text, user=user_profile
             )
             messages = Messages.objects.filter(conversation_id=conversation_id)
-            return JsonResponse(
-                {"messages": list(messages.values())}, status=status.HTTP_200_OK
+            return Response(
+                {"messages": list(messages.values())}, status=status.HTTP_201_CREATED
             )
         except Exception as e:
             logger.error(f"Error creating Message: {e}")
-            return JsonResponse(
+            return Response(
                 {"error": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
-# class MessageList(APIView):
-#     permission_classes = [IsAuthenticated]
+class Message(APIView):
+    def get(self, request):
+        conversation_id = request.GET.get("conversationId")
+        logger.debug(f"conversation_id{conversation_id}")
 
-#     def get(self, request):
-#         conversation_id = request.data.get("conversationId")
-#         messages = Messages.objects.filter(conversation_id=conversation_id)
-#         try:
-#             return Response(
-#                 {"messages": list(messages.values())}, status=status.HTTP_200_OK
-#             )
-#         except Exception as e:
-#             logger.error(f"Error listing messages {e}")
-#             return Response(
-#                 {"error": "error creating a list"},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             )
+        messages = Messages.objects.filter(conversation_id=conversation_id)
+        return Response(
+            {"messages": list(messages.values())}, status=status.HTTP_200_OK
+        )
