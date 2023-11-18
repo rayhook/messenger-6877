@@ -17,7 +17,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import axios from "axios";
 import { ActiveChatContext } from "../../context/activeChat";
-import { connect } from "react-redux";
+import { axiosInstance } from "../../API/axiosConfig";
 
 const useStyles = makeStyles((theme) => ({
   dashboard: {
@@ -91,42 +91,6 @@ const Input = (props) => {
 
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
-  const APIURL = "http://127.0.0.1:8000/messenger/";
-
-  const axiosInstance = axios.create({
-    baseURL: APIURL,
-    timeout: 5000,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("access")}`
-    }
-  });
-
-  axiosInstance.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-      const originalRequest = error.config;
-      if (error.response.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
-        try {
-          const res = await axios.post(APIURL + "api/token/refresh/", {
-            refresh: localStorage.getItem("refresh")
-          });
-          if (res.status === 200) {
-            localStorage.setItem("access", res.data.access);
-            axiosInstance.defaults.headers["Authorization"] = `Bearer ${res.data.access}`;
-            originalRequest.headers["Authorization"] = `Bearer ${res.data.access}`;
-          }
-          return axiosInstance(originalRequest);
-        } catch (refreshError) {
-          console.error("Token refresh failed", refreshError);
-          return Promise.reject(refreshError);
-        }
-      }
-      return Promise.reject(error);
-    }
-  );
-
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -149,10 +113,10 @@ const Input = (props) => {
     event.preventDefault();
     const reqBody = {
       conversation: activeChat.conversationId,
-      text: event.target.text.value,
-      username: activeChat.username
+      text: event.target.text.value
     };
     try {
+      console.log("reqBody?", reqBody);
       const response = await axiosInstance.post("/message/create", reqBody);
       console.log("input/response: ", response);
       setActiveChat({ ...activeChat, messages: response.data.messages });
@@ -307,15 +271,5 @@ const Input = (props) => {
     </>
   );
 };
-
-// const mapDispatchToProps = (dispatch) => {
-//   return {
-//     postMessage: (message) => {
-//       dispatch(postMessage(message));
-//     }
-//   };
-// };
-
-// export default connect(null, mapDispatchToProps)(Input);
 
 export default Input;

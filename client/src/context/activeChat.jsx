@@ -6,10 +6,10 @@ function ActiveChatProvider({ children }) {
   const [activeChat, setActiveChat] = useState({
     userId: null,
     username: null,
-    messages: [],
     conversations: [],
-    conversationId: null,
     newContacts: [],
+    conversationId: null,
+    messages: [],
     users: []
   });
 
