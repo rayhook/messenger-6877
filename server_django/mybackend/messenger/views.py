@@ -266,3 +266,29 @@ class Message(APIView):
         return Response(
             {"messages": list(messages.values())}, status=status.HTTP_200_OK
         )
+
+
+class LastMessage(APIView):
+    def get(self, request):
+        conversation_id = int(request.GET.get("conversationId"))
+        last_message_id = int(request.GET.get("lastMessageId"))
+
+        if conversation_id and last_message_id:
+            try:
+                new_messsages = Messages.objects.filter(
+                    conversation_id=conversation_id, id__gt=last_message_id
+                )
+                return Response(
+                    {"new_messages": list(new_messsages.values())},
+                    status=status.HTTP_200_OK,
+                )
+            except ValueError:
+                return Response(
+                    {"error": "Invalid last message_Id or conversation_id"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        else:
+            return Response(
+                {"error": "Missing conversationId or lastMessageId"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
