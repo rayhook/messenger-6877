@@ -53,11 +53,18 @@ const SidebarContainer = (props) => {
     const idValue = Number(id.slice(6));
     if (prefix === "conv") {
       try {
-        console.log("handleSectioChar-convo", idValue);
+        console.log("SidebarContainer/handleSelectChat-if-convo", idValue);
         const requestData = { conversationId: idValue };
         const response = await axiosInstance.get("messages/", { params: requestData });
         const messages = response.data.messages;
-        setActiveChat((prevState) => ({ ...prevState, conversationId: idValue, messages }));
+        const lastMessageId = messages[messages.length - 1].id;
+        console.log("Sidebarcontainer/messages? ", messages);
+        setActiveChat((prevState) => ({
+          ...prevState,
+          conversationId: idValue,
+          messages,
+          lastMessageId
+        }));
       } catch (error) {
         console.error(`error fetching messages, ${error.message}`);
       }

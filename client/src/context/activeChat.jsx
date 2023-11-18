@@ -10,7 +10,8 @@ function ActiveChatProvider({ children }) {
     newContacts: [],
     conversationId: null,
     messages: [],
-    users: []
+    users: [],
+    lastMessageId: null
   });
 
   return (
