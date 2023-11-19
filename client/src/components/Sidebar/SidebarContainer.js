@@ -48,20 +48,17 @@ const SidebarContainer = (props) => {
   };
 
   const handleSelectChat = async (id, otherUser) => {
-    console.log("handleSelectChat triggered!");
-    const prefix = id.slice(0, 4);
-    const idValue = Number(id.slice(6));
-    if (prefix === "conv") {
+    const convoPrefix = id.slice(0, 4);
+    const convoId = Number(id.slice(6));
+    if (convoPrefix === "conv") {
       try {
-        console.log("SidebarContainer/handleSelectChat-if-convo", idValue);
-        const requestData = { conversationId: idValue };
+        const requestData = { conversationId: convoId };
         const response = await axiosInstance.get("messages/", { params: requestData });
         const messages = response.data.messages;
-        const lastMessageId = messages[messages.length - 1].id;
-        console.log("Sidebarcontainer/messages? ", messages);
+        const lastMessageId = response.data.last_message_id;
         setActiveChat((prevState) => ({
           ...prevState,
-          conversationId: idValue,
+          conversationId: convoId,
           messages,
           lastMessageId
         }));
@@ -69,7 +66,6 @@ const SidebarContainer = (props) => {
         console.error(`error fetching messages, ${error.message}`);
       }
     } else {
-      console.log("handleSectioChar-newc_user");
       try {
         const response = await axiosInstance.post("/conversation/create", { otherUser });
         const conversationId = response.conversation_id;

@@ -83,7 +83,7 @@ const useStyles = makeStyles((theme) => ({
 const Input = (props) => {
   const classes = useStyles();
   const [text, setText] = useState("");
-  const { postMessage, otherUser, conversationId, user } = props;
+  const { postMessage, otherUser, user } = props;
   const [imageURL, setImageURL] = useState([]);
   const [imageText, setImageText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -115,11 +115,11 @@ const Input = (props) => {
       conversation: activeChat.conversationId,
       text: event.target.text.value
     };
+    console.log("reqBody? ", reqBody);
     try {
-      console.log("reqBody?", reqBody);
-      const response = await axiosInstance.post("/message/create", reqBody);
+      const response = await axiosInstance.post("/message/create/", reqBody);
       console.log("input/response: ", response);
-      setActiveChat({ ...activeChat, messages: response.data.messages });
+      setActiveChat((prevState) => ({ ...prevState, messages: response.data.messages }));
       setText("");
     } catch (error) {
       console.error("Failed to send message", error.message);
@@ -150,11 +150,11 @@ const Input = (props) => {
 
   const handleSendImage = async () => {
     const reqBody = {
-      text: imageText,
-      recipientId: otherUser.id,
-      conversationId,
-      sender: conversationId ? null : user,
-      attachments: imageURL
+      // text: imageText,
+      // recipientId: otherUser.id,
+      // conversationId,
+      // sender: conversationId ? null : user,
+      // attachments: imageURL
     };
 
     await postMessage(reqBody);
