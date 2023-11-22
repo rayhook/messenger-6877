@@ -83,7 +83,7 @@ const useStyles = makeStyles((theme) => ({
 const Input = (props) => {
   const classes = useStyles();
   const [text, setText] = useState("");
-  const { postMessage, otherUser, user } = props;
+  const { postMessage, otherUser } = props;
   const [imageURL, setImageURL] = useState([]);
   const [imageText, setImageText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -115,11 +115,14 @@ const Input = (props) => {
       conversation: activeChat.conversationId,
       text: event.target.text.value
     };
-    console.log("reqBody? ", reqBody);
+
     try {
       const response = await axiosInstance.post("/message/create/", reqBody);
-      console.log("input/response: ", response);
-      setActiveChat((prevState) => ({ ...prevState, messages: response.data.messages }));
+      setActiveChat((prevState) => ({
+        ...prevState,
+        messages: response.data.messages,
+        lastMessageId: response.data.last_message_id
+      }));
       setText("");
     } catch (error) {
       console.error("Failed to send message", error.message);
