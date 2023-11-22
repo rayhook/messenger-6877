@@ -28,19 +28,41 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const ActiveChat = (props) => {
+const ActiveChat = () => {
   const classes = useStyles();
-  const { user } = props;
-  const { activeChat } = useContext(ActiveChatContext);
+  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
+
+  const fetchLastMessages = async (convoId, lastMessage) => {
+    const reqData = {
+      conversationId: convoId,
+      lastMessageId: lastMessage
+    };
+    const response = await axiosInstance.get("/update/messages/", { params: reqData });
+    let newMessages = response.data.new_messages;
+    let lastMessageId = response.data.last_message_id;
+    if (newMessages && newMessages.length > 0) {
+      setActiveChat((prevState) => ({
+        ...prevState,
+        messages: [...prevState.messages, ...newMessages],
+        lastMessageId
+      }));
+    }
+  };
 
   useEffect(() => {
-    const fetchLastMessages = async () => {
-      const lastMessageId = activeChat.lastMessageId;
-      const reqData = { conversationID: activeChat.conversationID, lastMessageId };
-      axiosInstance.get("/messages/last", { params: reqData });
+    let intervalId;
+    if (activeChat.conversationId) {
+      intervalId = setInterval(
+        () => fetchLastMessages(activeChat.conversationId, activeChat.lastMessageId),
+        6000
+      );
+    }
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
     };
-    setInterval(() => fetchLastMessages(), 5000);
-  }, []);
+  }, [activeChat.conversationId, activeChat.lastMessageId]);
 
   return (
     <Box className={classes.root}>
@@ -53,12 +75,7 @@ const ActiveChat = (props) => {
             // otherUser={conversation.otherUser}
             // userId={user.id}
             />
-            <Input
-              className={classes.inputContainer}
-              otheruser={activeChat.username}
-              // conversationId={conversation.id}
-              user={user}
-            />
+            <Input className={classes.inputContainer} otheruser={activeChat.username} />
           </Box>
         </>
       )}
