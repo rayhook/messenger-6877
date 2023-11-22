@@ -233,8 +233,6 @@ class MessageCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        logger.info(f"MessageCreateView/request.data {request.data}")
-
         conversation_id = request.data.get("conversation")
         text = request.data.get("text")
         user_profile = request.user.userprofile
@@ -246,9 +244,15 @@ class MessageCreateView(APIView):
                 conversation=conversation, text=text, user=user_profile
             )
             messages = Messages.objects.filter(conversation_id=conversation_id)
-            return Response(
-                {"messages": list(messages.values())}, status=status.HTTP_201_CREATED
-            )
+            if messages.exists():
+                last_message_id = messages.last().id
+                return Response(
+                    {
+                        "messages": list(messages.values()),
+                        "last_message_id": last_message_id,
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
         except Exception as e:
             logger.error(f"Error creating Message: {e}")
             return Response(
@@ -260,35 +264,67 @@ class MessageCreateView(APIView):
 class Message(APIView):
     def get(self, request):
         conversation_id = request.GET.get("conversationId")
-        logger.debug(f"conversation_id{conversation_id}")
-
-        messages = Messages.objects.filter(conversation_id=conversation_id)
-        return Response(
-            {"messages": list(messages.values())}, status=status.HTTP_200_OK
-        )
-
-
-class LastMessage(APIView):
-    def get(self, request):
-        conversation_id = int(request.GET.get("conversationId"))
-        last_message_id = int(request.GET.get("lastMessageId"))
-
-        if conversation_id and last_message_id:
-            try:
-                new_messsages = Messages.objects.filter(
-                    conversation_id=conversation_id, id__gt=last_message_id
-                )
+        if conversation_id is not None:
+            messages = Messages.objects.filter(
+                conversation_id=conversation_id
+            ).order_by("id")
+            if messages.exists():
+                last_message_id = messages.last().id
                 return Response(
-                    {"new_messages": list(new_messsages.values())},
+                    {
+                        "messages": list(messages.values()),
+                        "last_message_id": last_message_id,
+                    },
                     status=status.HTTP_200_OK,
                 )
-            except ValueError:
+            else:
                 return Response(
-                    {"error": "Invalid last message_Id or conversation_id"},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    {"messages": [], "last_message_id": None},
+                    status=status.HTTP_200_OK,
                 )
         else:
             return Response(
+                {"error": "No conversation Id provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class NewMessage(APIView):
+    def get(self, request):
+        conversation_id = request.GET.get("conversationId")
+        last_message_id = request.GET.get("lastMessageId")
+
+        if conversation_id is None or last_message_id is None:
+            return Response(
                 {"error": "Missing conversationId or lastMessageId"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            conversation_id = int(conversation_id)
+            last_message_id = int(last_message_id)
+            new_messages = Messages.objects.filter(
+                conversation_id=conversation_id,
+                id__gt=last_message_id,
+            ).order_by("id")
+
+            if new_messages.exists():
+                last_message_id = new_messages.last().id
+                return Response(
+                    {
+                        "new_messages": list(new_messages.values()),
+                        "last_message_id": last_message_id,
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"new_messages": [], "last_message_id": last_message_id},
+                    status=status.HTTP_200_OK,
+                )
+
+        except ValueError:
+            return Response(
+                {"error": "Invalid last message_Id or conversation_id"},
                 status=status.HTTP_400_BAD_REQUEST,
             )

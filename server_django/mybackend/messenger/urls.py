@@ -22,7 +22,7 @@ urlpatterns = [
         views.SearchView.as_view(),
         name="search",
     ),
-    path("messages/last/", views.LastMessage.as_view(), name="last_message"),
+    path("update/messages/", views.NewMessage.as_view(), name="last_message"),
     path("conversations/", views.ConversationsView.as_view(), name="conversations"),
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.LoginView.as_view(), name="login"),
