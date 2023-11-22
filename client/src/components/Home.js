@@ -19,16 +19,6 @@ const Home = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const response = await axiosInstance.get("users/");
-      console.log("Home/users? ", response.data.users);
-      setActiveChat((prevActiveChat) => ({ ...prevActiveChat, users: response.data.users }));
-      console.log("Home/Conversations ", activeChat.conversations);
-    };
-    fetchUsers();
-  }, []);
-
   const APIURL = "http://127.0.0.1:8000/messenger/";
 
   const handleLogout = async () => {
