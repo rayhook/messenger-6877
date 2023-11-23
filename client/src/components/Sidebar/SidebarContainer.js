@@ -15,8 +15,6 @@ const SidebarContainer = (props) => {
       try {
         const response = await axiosInstance.get(`search/?search=${searchTerm}`);
         const conversations = response.data;
-        console.log("SidebarContainer/conversation_list ", conversations.conversation_list);
-        console.log("SidebarContainer/new_contacts ", conversations.new_contacts);
         setActiveChat((prevState) => ({
           ...prevState,
           conversations: conversations.conversation_list,
@@ -35,8 +33,6 @@ const SidebarContainer = (props) => {
     try {
       const response = await axiosInstance.get(`search/?search=${event.target.value}`);
       const conversations = response.data;
-      console.log("SidebarContainer/conversation_list ", conversations.conversation_list);
-      console.log("SidebarContainer/new_contacts ", conversations.new_contacts);
       setActiveChat((prevState) => ({
         ...prevState,
         conversations: conversations.conversation_list,
@@ -55,12 +51,14 @@ const SidebarContainer = (props) => {
         const requestData = { conversationId: convoId };
         const response = await axiosInstance.get("messages/", { params: requestData });
         const messages = response.data.messages;
+        const userId = response.data.user_id;
         const lastMessageId = response.data.last_message_id;
         setActiveChat((prevState) => ({
           ...prevState,
           conversationId: convoId,
           messages,
-          lastMessageId
+          lastMessageId,
+          userId
         }));
       } catch (error) {
         console.error(`error fetching messages, ${error.message}`);
