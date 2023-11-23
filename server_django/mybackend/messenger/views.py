@@ -236,6 +236,7 @@ class MessageCreateView(APIView):
         conversation_id = request.data.get("conversation")
         text = request.data.get("text")
         user_profile = request.user.userprofile
+        logger.debug(f"Authenticated user: {request.user.username}")
 
         conversation = Conversations.objects.get(id=conversation_id)
 
@@ -272,6 +273,7 @@ class Message(APIView):
                 last_message_id = messages.last().id
                 return Response(
                     {
+                        "user_id": request.user.id,
                         "messages": list(messages.values()),
                         "last_message_id": last_message_id,
                     },
