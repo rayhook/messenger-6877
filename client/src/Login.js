@@ -1,6 +1,5 @@
 import React, { useContext, useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { connect } from "react-redux";
 import { Grid } from "@material-ui/core";
 import axios from "axios";
 
@@ -8,9 +7,9 @@ import { LeftGrid, RightGrid } from "./Signup";
 import { useStyles } from "./Signup";
 import { ActiveChatContext } from "./context/activeChat";
 
-const Login = (props) => {
+const Login = () => {
   const history = useHistory();
-  const { user, login } = props;
+
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
