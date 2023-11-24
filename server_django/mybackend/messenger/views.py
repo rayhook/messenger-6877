@@ -65,7 +65,7 @@ class LoginView(APIView):
             {
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
-                "userId": user.id,
+                "userId": user.userprofile.id,
             },
             status=status.HTTP_200_OK,
         )
@@ -273,7 +273,7 @@ class Message(APIView):
                 last_message_id = messages.last().id
                 return Response(
                     {
-                        "user_id": request.user.id,
+                        "user_id": request.user.userprofile.id,
                         "messages": list(messages.values()),
                         "last_message_id": last_message_id,
                     },
