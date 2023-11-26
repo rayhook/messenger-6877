@@ -123,14 +123,18 @@ class ConversationCreateView(APIView):
 
     def post(self, request):
         other_user_username = request.data.get("otherUser")
-        user = get_object_or_404(User, username=other_user_username)
-        other_user_user_profile = get_object_or_404(UserProfile, user=user)
+        other_user = get_object_or_404(User, username=other_user_username)
+        other_user_user_profile = get_object_or_404(UserProfile, user=other_user)
         try:
             conversation = Conversations.objects.create(
                 user=request.user.userprofile, other_user=other_user_user_profile
             )
             return Response(
-                {"conversation_id": conversation.id}, status=status.HTTP_201_CREATED
+                {
+                    "user_id": request.user.userprofile.id,
+                    "conversation_id": conversation.id,
+                },
+                status=status.HTTP_201_CREATED,
             )
         except Exception as e:
             logger.error(f"Error creating a conversation: {e}")
@@ -281,7 +285,11 @@ class Message(APIView):
                 )
             else:
                 return Response(
-                    {"messages": [], "last_message_id": None},
+                    {
+                        "user_id": request.user.userprofile.id,
+                        "messages": [],
+                        "last_message_id": None,
+                    },
                     status=status.HTTP_200_OK,
                 )
         else:
@@ -296,10 +304,14 @@ class NewMessage(APIView):
         conversation_id = request.GET.get("conversationId")
         last_message_id = request.GET.get("lastMessageId")
 
-        if conversation_id is None or last_message_id is None:
+        if conversation_id is None:
             return Response(
                 {"error": "Missing conversationId or lastMessageId"},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        if conversation_id is not None and last_message_id is None:
+            return Response(
+                {"new_messages": [], "last_message_id": None}, status=status.HTTP_200_OK
             )
 
         try:
