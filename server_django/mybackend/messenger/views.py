@@ -14,6 +14,7 @@ from django.db.models import Q
 
 from messenger.models import Conversations, UserProfile, Messages
 import logging
+from .utils.user_helpers import get_user_profile
 
 
 JWT_authenticator = JWTAuthentication()
@@ -61,11 +62,12 @@ class LoginView(APIView):
             )
 
         refresh = RefreshToken.for_user(user)
+        user_profile = get_user_profile(user)
         return Response(
             {
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
-                "userId": user.userprofile.id,
+                "userId": user_profile.id,
             },
             status=status.HTTP_200_OK,
         )
@@ -125,13 +127,14 @@ class ConversationCreateView(APIView):
         other_user_username = request.data.get("otherUser")
         other_user = get_object_or_404(User, username=other_user_username)
         other_user_user_profile = get_object_or_404(UserProfile, user=other_user)
+        user_profile = get_user_profile(request.user)
         try:
             conversation = Conversations.objects.create(
-                user=request.user.userprofile, other_user=other_user_user_profile
+                user=user_profile, other_user=other_user_user_profile
             )
             return Response(
                 {
-                    "user_id": request.user.userprofile.id,
+                    "user_id": user_profile.id,
                     "conversation_id": conversation.id,
                 },
                 status=status.HTTP_201_CREATED,
@@ -149,7 +152,7 @@ class SearchView(APIView):
 
     def get(self, request):
         search_query = request.query_params.get("search", "")
-        current_user_profile = request.user.userprofile
+        current_user_profile = get_user_profile(request.user)
         conversations, new_contacts, new_contact_list = [], [], []
 
         if search_query:
@@ -239,7 +242,7 @@ class MessageCreateView(APIView):
     def post(self, request):
         conversation_id = request.data.get("conversation")
         text = request.data.get("text")
-        user_profile = request.user.userprofile
+        user_profile = get_user_profile(request.user)
         logger.debug(f"Authenticated user: {request.user.username}")
 
         conversation = Conversations.objects.get(id=conversation_id)
@@ -277,7 +280,7 @@ class Message(APIView):
                 last_message_id = messages.last().id
                 return Response(
                     {
-                        "user_id": request.user.userprofile.id,
+                        "user_id": get_user_profile(request.user).id,
                         "messages": list(messages.values()),
                         "last_message_id": last_message_id,
                     },
@@ -286,7 +289,7 @@ class Message(APIView):
             else:
                 return Response(
                     {
-                        "user_id": request.user.userprofile.id,
+                        "user_id": get_user_profile(request.user).id,
                         "messages": [],
                         "last_message_id": None,
                     },
