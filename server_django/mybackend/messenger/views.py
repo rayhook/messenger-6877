@@ -15,6 +15,11 @@ from django.db.models import Q
 from messenger.models import Conversations, UserProfile, Messages
 import logging
 from .utils.user_helpers import get_user_profile
+from .utils.search_helpers import (
+    search_conversations,
+    search_new_contacts,
+    format_conversation_list,
+)
 
 
 JWT_authenticator = JWTAuthentication()
@@ -153,47 +158,20 @@ class SearchView(APIView):
     def get(self, request):
         search_query = request.query_params.get("search", "")
         current_user_profile = get_user_profile(request.user)
-        conversations, new_contacts, new_contact_list = [], [], []
-
+        new_contacts = []
         if search_query:
-            # all users that their username contains the search query
-            users = UserProfile.objects.filter(user__username__icontains=search_query)
-            # conversations between current user and in users (users are filtered to contain search query)
-            conversations = Conversations.objects.filter(
-                Q(user=current_user_profile, other_user__in=users)
-                | Q(other_user=current_user_profile, user__in=users)
-            ).distinct()
-            existing_contact_ids = [c.user.id for c in conversations] + [
-                c.other_user.id for c in conversations
-            ]
-
-            new_contacts = UserProfile.objects.exclude(
-                id__in=existing_contact_ids
-            ).filter(user__username__icontains=search_query)
-
-            new_contact_list = [
-                {"id": contact.id, "with_user": contact.user.username}
-                for contact in new_contacts
-            ]
-
+            conversations = search_conversations(search_query, current_user_profile)
+            new_contacts = search_new_contacts(search_query, conversations)
         else:
             conversations = Conversations.objects.filter(
                 Q(user=current_user_profile) | Q(other_user=current_user_profile)
             ).distinct()
 
-        conversation_list = [
-            {
-                "id": conversation.id,
-                "with_user": conversation.other_user.user.username
-                if conversation.user == current_user_profile
-                else conversation.user.user.username,
-                "timestamp": conversation.timestamp,
-            }
-            for conversation in conversations
-        ]
-
+        conversation_list = format_conversation_list(
+            conversations, current_user_profile
+        )
         return Response(
-            {"conversation_list": conversation_list, "new_contacts": new_contact_list},
+            {"conversation_list": conversation_list, "new_contacts": new_contacts},
             status=status.HTTP_200_OK,
         )
 
