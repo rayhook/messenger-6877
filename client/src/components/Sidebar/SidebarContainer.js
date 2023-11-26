@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { Sidebar } from "./index";
 import { axiosInstance } from "../../API/axiosConfig";
 import { ActiveChatContext } from "../../context/activeChat";
-import axios from "axios";
 
 const SidebarContainer = (props) => {
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
@@ -50,9 +49,11 @@ const SidebarContainer = (props) => {
       try {
         const requestData = { conversationId: convoId };
         const response = await axiosInstance.get("messages/", { params: requestData });
+
         const messages = response.data.messages;
         const userId = response.data.user_id;
         const lastMessageId = response.data.last_message_id;
+        console.log("convo/userId", userId);
         setActiveChat((prevState) => ({
           ...prevState,
           conversationId: convoId,
@@ -65,9 +66,10 @@ const SidebarContainer = (props) => {
       }
     } else {
       try {
-        const response = await axiosInstance.post("/conversation/create", { otherUser });
-        const conversationId = response.conversation_id;
-        setActiveChat((prevState) => ({ ...prevState, conversationId }));
+        const response = await axiosInstance.post("/conversation/create/", { otherUser });
+        const userId = response.data.user_id;
+        const conversationId = response.data.conversation_id;
+        setActiveChat((prevState) => ({ ...prevState, userId, conversationId }));
       } catch (error) {
         console.error(`error creating conversation ${error.message}`);
       }

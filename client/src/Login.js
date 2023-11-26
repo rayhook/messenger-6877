@@ -27,7 +27,6 @@ const Login = () => {
       localStorage.setItem("refresh", response.data.refresh);
       localStorage.setItem("access", response.data.access);
       setActiveChat((prevActiveChat) => ({ ...prevActiveChat, userId: response.data.userId }));
-      console.log("Login/activeChat.conversations: ", activeChat.conversations);
       setIsLoggedIn(true);
     } catch (err) {
       console.error(err.message);
