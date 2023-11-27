@@ -117,7 +117,7 @@ const Input = (props) => {
     };
 
     try {
-      const response = await axiosInstance.post("/message/create/", reqBody);
+      const response = await axiosInstance.post("/messages/", reqBody);
       setActiveChat((prevState) => ({
         ...prevState,
         messages: response.data.messages,
