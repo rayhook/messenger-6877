@@ -15,8 +15,7 @@ urlpatterns = [
         views.ConversationCreateView.as_view(),
         name="conversation_create",
     ),
-    path("message/create/", views.MessageCreateView.as_view(), name="message_create"),
-    path("messages/", views.Message.as_view(), name="messages"),
+    path("messages/", views.MessageView.as_view(), name="messages"),
     path(
         "search/",
         views.SearchView.as_view(),

@@ -20,6 +20,7 @@ from .utils.search_helpers import (
     search_new_contacts,
     format_conversation_list,
 )
+from .utils.message_helpers import get_last_message_id
 
 
 JWT_authenticator = JWTAuthentication()
@@ -156,12 +157,12 @@ class SearchView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        search_query = request.query_params.get("search", "")
+        query = request.query_params.get("search", "")
         current_user_profile = get_user_profile(request.user)
         new_contacts = []
-        if search_query:
-            conversations = search_conversations(search_query, current_user_profile)
-            new_contacts = search_new_contacts(search_query, conversations)
+        if query:
+            conversations = search_conversations(query, current_user_profile)
+            new_contacts = search_new_contacts(query, conversations)
         else:
             conversations = Conversations.objects.filter(
                 Q(user=current_user_profile) | Q(other_user=current_user_profile)
@@ -214,40 +215,9 @@ class ConversationsView(APIView):
         )
 
 
-class MessageCreateView(APIView):
+class MessageView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        conversation_id = request.data.get("conversation")
-        text = request.data.get("text")
-        user_profile = get_user_profile(request.user)
-        logger.debug(f"Authenticated user: {request.user.username}")
-
-        conversation = Conversations.objects.get(id=conversation_id)
-
-        try:
-            Messages.objects.create(
-                conversation=conversation, text=text, user=user_profile
-            )
-            messages = Messages.objects.filter(conversation_id=conversation_id)
-            if messages.exists():
-                last_message_id = messages.last().id
-                return Response(
-                    {
-                        "messages": list(messages.values()),
-                        "last_message_id": last_message_id,
-                    },
-                    status=status.HTTP_201_CREATED,
-                )
-        except Exception as e:
-            logger.error(f"Error creating Message: {e}")
-            return Response(
-                {"error": "An unexpected error occurred"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-
-class Message(APIView):
     def get(self, request):
         conversation_id = request.GET.get("conversationId")
         if conversation_id is not None:
@@ -255,12 +225,11 @@ class Message(APIView):
                 conversation_id=conversation_id
             ).order_by("id")
             if messages.exists():
-                last_message_id = messages.last().id
                 return Response(
                     {
                         "user_id": get_user_profile(request.user).id,
                         "messages": list(messages.values()),
-                        "last_message_id": last_message_id,
+                        "last_message_id": get_last_message_id(messages),
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -277,6 +246,32 @@ class Message(APIView):
             return Response(
                 {"error": "No conversation Id provided"},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def post(self, request):
+        conversation_id = request.data.get("conversation")
+        text = request.data.get("text")
+        user_profile = get_user_profile(request.user)
+
+        conversation = Conversations.objects.get(id=conversation_id)
+
+        try:
+            Messages.objects.create(
+                conversation=conversation, text=text, user=user_profile
+            )
+            messages = Messages.objects.filter(conversation_id=conversation_id)
+            if messages.exists():
+                return Response(
+                    {
+                        "messages": list(messages.values()),
+                        "last_message_id": get_last_message_id(messages),
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
+        except Exception as e:
+            return Response(
+                {"error": "An unexpected error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
