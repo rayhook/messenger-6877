@@ -66,7 +66,7 @@ const SidebarContainer = (props) => {
       }
     } else {
       try {
-        const response = await axiosInstance.post("/conversation/create/", { otherUser });
+        const response = await axiosInstance.post("/conversations/", { otherUser });
         const userId = response.data.user_id;
         const conversationId = response.data.conversation_id;
         setActiveChat((prevState) => ({ ...prevState, userId, conversationId }));
