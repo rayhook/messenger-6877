@@ -14,6 +14,10 @@ urlpatterns = [
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("conversations/", views.ConversationView.as_view(), name="conversations"),
     path("search/", views.SearchView.as_view(), name="search"),
-    path("update/messages/", views.NewMessage.as_view(), name="update_message"),
     path("messages/", views.MessageView.as_view(), name="messages"),
+    path(
+        "/messages/check-new/",
+        views.CheckNewMessagesView.as_view(),
+        name="check_new_messages",
+    ),
 ]

@@ -37,7 +37,7 @@ const ActiveChat = () => {
       conversationId: convoId,
       lastMessageId: lastMessage
     };
-    const response = await axiosInstance.get("/update/messages/", { params: reqData });
+    const response = await axiosInstance.get("/messages/check-new/", { params: reqData });
     let newMessages = response.data.new_messages;
     let lastMessageId = response.data.last_message_id;
     if (newMessages && newMessages.length > 0) {

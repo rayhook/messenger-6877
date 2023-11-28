@@ -236,7 +236,7 @@ class MessageView(APIView):
             )
 
 
-class NewMessage(APIView):
+class CheckNewMessagesView(APIView):
     def get(self, request):
         conversation_id = request.GET.get("conversationId")
         last_message_id = request.GET.get("lastMessageId")
