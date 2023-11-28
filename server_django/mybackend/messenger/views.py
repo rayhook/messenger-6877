@@ -1,19 +1,17 @@
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.exceptions import TokenError
+from django.contrib.auth import authenticate
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.exceptions import NotFound
 from django.db.models import Q
-
 from messenger.models import Conversations, UserProfile, Messages
 import logging
+
 from .utils.user_helpers import get_user_profile
 from .utils.search_helpers import (
     search_conversations,
@@ -43,8 +41,6 @@ class RegisterView(APIView):
         user = User.objects.create_user(
             username=username, password=password, email=email
         )
-
-        logger.info("User {username} created successfully!")
 
         user_profile = UserProfile(user=user)
         user_profile.save()
@@ -105,79 +101,7 @@ class LogoutView(APIView):
         )
 
 
-class UsersView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        try:
-            users_list = User.objects.all()
-            users_list_password_removed = []
-            for user in users_list:
-                users_list_password_removed.append(
-                    {"id": user.id, "username": user.username, "email": user.email}
-                )
-            return Response(
-                {"users": users_list_password_removed}, status=status.HTTP_200_OK
-            )
-        except:
-            return Response(
-                {"error": "failed to get users_list"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-
-class ConversationCreateView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        other_user_username = request.data.get("otherUser")
-        other_user = get_object_or_404(User, username=other_user_username)
-        other_user_user_profile = get_object_or_404(UserProfile, user=other_user)
-        user_profile = get_user_profile(request.user)
-        try:
-            conversation = Conversations.objects.create(
-                user=user_profile, other_user=other_user_user_profile
-            )
-            return Response(
-                {
-                    "user_id": user_profile.id,
-                    "conversation_id": conversation.id,
-                },
-                status=status.HTTP_201_CREATED,
-            )
-        except Exception as e:
-            logger.error(f"Error creating a conversation: {e}")
-            return Response(
-                {"error": "an error occured while creating the conversation"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-
-class SearchView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        query = request.query_params.get("search", "")
-        current_user_profile = get_user_profile(request.user)
-        new_contacts = []
-        if query:
-            conversations = search_conversations(query, current_user_profile)
-            new_contacts = search_new_contacts(query, conversations)
-        else:
-            conversations = Conversations.objects.filter(
-                Q(user=current_user_profile) | Q(other_user=current_user_profile)
-            ).distinct()
-
-        conversation_list = format_conversation_list(
-            conversations, current_user_profile
-        )
-        return Response(
-            {"conversation_list": conversation_list, "new_contacts": new_contacts},
-            status=status.HTTP_200_OK,
-        )
-
-
-class ConversationsView(APIView):
+class ConversationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -212,6 +136,52 @@ class ConversationsView(APIView):
             )
         return Response(
             {"conversations": conversation_with_username}, status=status.HTTP_200_OK
+        )
+
+    def post(self, request):
+        other_user_username = request.data.get("otherUser")
+        other_user = get_object_or_404(User, username=other_user_username)
+        other_user_user_profile = get_object_or_404(UserProfile, user=other_user)
+        user_profile = get_user_profile(request.user)
+        try:
+            conversation = Conversations.objects.create(
+                user=user_profile, other_user=other_user_user_profile
+            )
+            return Response(
+                {
+                    "user_id": user_profile.id,
+                    "conversation_id": conversation.id,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        except Exception as e:
+            return Response(
+                {"error": "an error occured while creating the conversation"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class SearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.query_params.get("search", "")
+        current_user_profile = get_user_profile(request.user)
+        new_contacts = []
+        if query:
+            conversations = search_conversations(query, current_user_profile)
+            new_contacts = search_new_contacts(query, conversations)
+        else:
+            conversations = Conversations.objects.filter(
+                Q(user=current_user_profile) | Q(other_user=current_user_profile)
+            ).distinct()
+
+        conversation_list = format_conversation_list(
+            conversations, current_user_profile
+        )
+        return Response(
+            {"conversation_list": conversation_list, "new_contacts": new_contacts},
+            status=status.HTTP_200_OK,
         )
 
 
@@ -303,7 +273,7 @@ class NewMessage(APIView):
                 return Response(
                     {
                         "new_messages": list(new_messages.values()),
-                        "last_message_id": last_message_id,
+                        "last_message_id": get_last_message_id(new_messages),
                     },
                     status=status.HTTP_200_OK,
                 )
