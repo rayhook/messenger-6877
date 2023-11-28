@@ -13,6 +13,10 @@ from messenger.models import Conversations, UserProfile, Messages
 import logging
 
 from .utils.user_helpers import get_user_profile
+from .utils.conversation_helpers import (
+    get_conversations,
+    format_conversation_with_username,
+)
 from .utils.search_helpers import (
     search_conversations,
     search_new_contacts,
@@ -106,30 +110,17 @@ class ConversationView(APIView):
 
     def get(self, request):
         try:
-            current_user_profile = UserProfile.objects.get(user=request.user)
-            conversations = Conversations.objects.filter(
-                user=current_user_profile
-            ).prefetch_related("user__user")
-            conversation_with_username = []
-            for convo in conversations:
-                conversation_with_username.append(
-                    {
-                        "id": convo.id,
-                        "user_id": convo.user.user.id,
-                        "username": convo.user.user.username,
-                        "timestamp": convo.timestamp,
-                    }
-                )
+            user_profile = request.user.userprofile
+            conversations = get_conversations(user_profile)
+            conversation_with_username = format_conversation_with_username(
+                conversations
+            )
         except UserProfile.DoesNotExist:
-            logging.error(f"UserProfile doesnt not exist: {request.user}")
             return Response(
                 {"error": "UserProfile doesnt exist"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except Conversations.DoesNotExist:
-            logging.error(
-                f"No conversations found for user profile: {current_user_profile}"
-            )
             return Response(
                 {"error": "No conversations found"},
                 status=status.HTTP_404_NOT_FOUND,
