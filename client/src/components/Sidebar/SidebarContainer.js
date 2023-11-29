@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Sidebar } from "./index";
 import { axiosInstance } from "../../API/axiosConfig";
-import { ActiveChatContext } from "../../context/activeChat";
+import { ActiveChatContext } from "../../context/ActiveChatContext";
 import { AuthContext } from "../../context/AuthContext";
 
 const SidebarContainer = (props) => {

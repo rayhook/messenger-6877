@@ -16,7 +16,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import axios from "axios";
-import { ActiveChatContext } from "../../context/activeChat";
+import { ActiveChatContext } from "../../context/ActiveChatContext";
 import { axiosInstance } from "../../API/axiosConfig";
 
 const useStyles = makeStyles((theme) => ({

@@ -1,5 +1,4 @@
-import { createContext, useContext, useState } from "react";
-import { ActiveChatContext } from "./activeChat";
+import { createContext, useState } from "react";
 import axios from "axios";
 
 export const AuthContext = createContext(null);

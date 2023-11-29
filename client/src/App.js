@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import { theme } from "./themes/theme";
 import Routes from "./routes";
-import { ActiveChatProvider } from "./context/activeChat";
+import { ActiveChatProvider } from "./context/ActiveChatContext";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {

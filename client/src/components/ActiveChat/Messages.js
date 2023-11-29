@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Box } from "@material-ui/core";
 import { SenderBubble, OtherUserBubble } from "../ActiveChat";
 import moment from "moment";
-import { ActiveChatContext } from "../../context/activeChat";
+import { ActiveChatContext } from "../../context/ActiveChatContext";
 import { AuthContext } from "../../context/AuthContext";
 
 const Messages = () => {
