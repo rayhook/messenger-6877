@@ -16,7 +16,7 @@ urlpatterns = [
     path("search/", views.SearchView.as_view(), name="search"),
     path("messages/", views.MessageView.as_view(), name="messages"),
     path(
-        "/messages/check-new/",
+        "messages/check-new/",
         views.CheckNewMessagesView.as_view(),
         name="check_new_messages",
     ),
