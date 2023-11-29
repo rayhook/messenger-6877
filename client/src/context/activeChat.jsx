@@ -4,7 +4,6 @@ const ActiveChatContext = createContext(undefined);
 
 function ActiveChatProvider({ children }) {
   const [activeChat, setActiveChat] = useState({
-    userId: null,
     username: null,
     conversations: [],
     newContacts: [],

@@ -1,14 +1,13 @@
-import axios from "axios";
 import { createContext, useContext, useState } from "react";
 import { ActiveChatContext } from "./activeChat";
+import axios from "axios";
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [auth, setAuth] = useState({ isLoggedIn: false });
-  const { setActiveChat } = useContext(ActiveChatContext);
-
+  const [auth, setAuth] = useState({ isLoggedIn: false, userId: null });
   const API_URL = "http://127.0.0.1:8000/messenger/";
+
   const login = async (userData) => {
     try {
       const response = await axios.post(API_URL + "login/", userData);
@@ -16,8 +15,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("refresh", response.data.refresh);
       localStorage.setItem("access", response.data.access);
 
-      setActiveChat((prevState) => ({ ...prevState, userId: response.data.userId }));
-      setAuth((prevState) => ({ ...prevState, isLoggedIn: true }));
+      setAuth((prevState) => ({ ...prevState, isLoggedIn: true, userId: response.data.userId }));
     } catch (err) {
       console.error(err.message);
     }
@@ -30,11 +28,13 @@ export const AuthProvider = ({ children }) => {
       await axios.post(API_URL + "logout/", tokenData);
       localStorage.removeItem("access");
       localStorage.removeItem("refresh");
-      setAuth((prevState) => ({ ...prevState, isLoggedIn: false }));
+      setAuth((prevState) => ({ ...prevState, isLoggedIn: false, userId: null }));
     } catch (err) {
       console.error("Logout failed", err.message);
     }
   };
 
-  return <AuthContext.Provider value={{ login, logout, auth }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ login, logout, auth, setAuth }}>{children}</AuthContext.Provider>
+  );
 };
