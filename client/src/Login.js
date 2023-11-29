@@ -1,17 +1,15 @@
-import React, { useContext, useState } from "react";
+import { useContext } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import { Grid } from "@material-ui/core";
-import axios from "axios";
 
 import { LeftGrid, RightGrid } from "./Signup";
 import { useStyles } from "./Signup";
-import { ActiveChatContext } from "./context/activeChat";
+import { AuthContext } from "./context/AuthContext";
 
 const Login = () => {
   const history = useHistory();
 
-  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { auth, login } = useContext(AuthContext);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -19,24 +17,15 @@ const Login = () => {
     const password = event.target.password.value;
 
     const userData = { username, password };
-    const API_URL = "http://127.0.0.1:8000/messenger/";
 
-    try {
-      const response = await axios.post(API_URL + "login/", userData);
-
-      localStorage.setItem("refresh", response.data.refresh);
-      localStorage.setItem("access", response.data.access);
-      setActiveChat((prevActiveChat) => ({ ...prevActiveChat, userId: response.data.userId }));
-      setIsLoggedIn(true);
-    } catch (err) {
-      console.error(err.message);
-    }
+    login(userData);
   };
+
   const registerRedirect = () => history.push("/register");
 
   const classes = useStyles();
 
-  if (isLoggedIn) {
+  if (auth.isLoggedIn) {
     return <Redirect to="/home" />;
   }
 

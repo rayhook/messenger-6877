@@ -1,12 +1,10 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useContext } from "react";
 import { Redirect } from "react-router-dom";
 import { Grid, CssBaseline, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { SidebarContainer } from "./Sidebar";
 import { ActiveChat } from "./ActiveChat";
-import axios from "axios";
-import { axiosInstance } from "../API/axiosConfig";
-import { ActiveChatContext } from "../context/activeChat";
+import { AuthContext } from "../context/AuthContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -14,32 +12,20 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Home = (props) => {
+const Home = () => {
   const classes = useStyles();
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
-
-  const APIURL = "http://127.0.0.1:8000/messenger/";
+  const { auth, logout } = useContext(AuthContext);
 
   const handleLogout = async () => {
-    try {
-      const tokenData = { refresh: localStorage.getItem("refresh") };
-      await axios.post(APIURL + "logout/", tokenData);
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
-      setIsLoggedIn(false);
-    } catch (err) {
-      console.error("Logout failed", err.message);
-    }
+    logout();
   };
 
-  if (!isLoggedIn) {
+  if (!auth.isLoggedIn) {
     return <Redirect to="/login" />;
   }
 
   return (
     <>
-      {/* logout button will eventually be in a dropdown next to username */}
       <Button className={classes.logout} onClick={handleLogout}>
         Logout
       </Button>
