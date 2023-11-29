@@ -2,9 +2,11 @@ import React, { useState, useEffect, useContext } from "react";
 import { Sidebar } from "./index";
 import { axiosInstance } from "../../API/axiosConfig";
 import { ActiveChatContext } from "../../context/activeChat";
+import { AuthContext } from "../../context/AuthContext";
 
 const SidebarContainer = (props) => {
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
+  const { setAuth } = useContext(AuthContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -53,14 +55,13 @@ const SidebarContainer = (props) => {
         const messages = response.data.messages;
         const userId = response.data.user_id;
         const lastMessageId = response.data.last_message_id;
-        console.log("convo/userId", userId);
         setActiveChat((prevState) => ({
           ...prevState,
           conversationId: convoId,
           messages,
-          lastMessageId,
-          userId
+          lastMessageId
         }));
+        setAuth((prevState) => ({ ...prevState, userId: userId }));
       } catch (error) {
         console.error(`error fetching messages, ${error.message}`);
       }
@@ -69,7 +70,8 @@ const SidebarContainer = (props) => {
         const response = await axiosInstance.post("/conversations/", { otherUser });
         const userId = response.data.user_id;
         const conversationId = response.data.conversation_id;
-        setActiveChat((prevState) => ({ ...prevState, userId, conversationId }));
+        setActiveChat((prevState) => ({ ...prevState, conversationId }));
+        setAuth((prevState) => ({ ...prevState, userId: userId }));
       } catch (error) {
         console.error(`error creating conversation ${error.message}`);
       }
