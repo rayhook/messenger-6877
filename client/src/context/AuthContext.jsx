@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
       const accessToekn = localStorage.getItem("access");
       if (!accessToekn) return;
       try {
-        const response = axios.post(API_URL + "api/token/validate/", {
+        const response = await axios.post(API_URL + "api/token/validate/", {
           token: accessToekn
         });
         if (response.data.isValid) {
