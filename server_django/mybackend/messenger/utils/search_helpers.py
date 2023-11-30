@@ -1,11 +1,11 @@
-from messenger.models import UserProfile, Conversations
+from messenger.models import UserProfile, Conversation
 from django.db.models import Q
 
 
 def search_conversations(search_query, current_user_profile):
     if search_query:
         users = UserProfile.objects.filter(user__username__icontains=search_query)
-        conversations = Conversations.objects.filter(
+        conversations = Conversation.objects.filter(
             Q(user=current_user_profile, other_user__in=users)
             | Q(other_user=current_user_profile, user__in=users)
         ).distinct()

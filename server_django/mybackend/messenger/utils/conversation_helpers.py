@@ -1,10 +1,8 @@
-from messenger.models import Conversations
+from messenger.models import Conversation
 
 
 def get_conversations(user_profile):
-    return Conversations.objects.filter(user=user_profile).prefetch_related(
-        "user__user"
-    )
+    return Conversation.objects.filter(user=user_profile).prefetch_related("user__user")
 
 
 def format_conversation_with_username(conversations):
