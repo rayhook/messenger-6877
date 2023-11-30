@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { Box } from "@material-ui/core";
 import { SenderBubble, OtherUserBubble } from "../ActiveChat";
 import moment from "moment";
@@ -8,6 +8,17 @@ import { AuthContext } from "../../context/AuthContext";
 const Messages = () => {
   const { activeChat } = useContext(ActiveChatContext);
   const { auth } = useContext(AuthContext);
+
+  const lastMessageRef = useRef(null);
+
+  const scrollToBottom = () => {
+    lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [activeChat.messages]);
+
   return (
     <Box>
       {activeChat.messages &&
@@ -19,6 +30,7 @@ const Messages = () => {
             return <OtherUserBubble key={message.id} text={message.text} time={time} />;
           }
         })}
+      <div ref={lastMessageRef}></div>
     </Box>
   );
 };
