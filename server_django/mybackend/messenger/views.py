@@ -4,12 +4,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
-from messenger.models import Conversations, UserProfile, Messages
+from messenger.models import Conversation, UserProfile, Message
+from rest_framework_simplejwt.tokens import UntypedToken
 import logging
 
 from .utils.user_helpers import get_user_profile
@@ -105,6 +106,18 @@ class LogoutView(APIView):
         )
 
 
+class ValidateTokenView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        token = request.data.get("token")
+        try:
+            UntypedToken(token)
+            return Response({"isValid": True}, status=status.HTTP_200_OK)
+        except (InvalidToken, TokenError):
+            return Response({"isValid": False}, status=status.HTTP_200_OK)
+
+
 class ConversationView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -120,7 +133,7 @@ class ConversationView(APIView):
                 {"error": "UserProfile doesnt exist"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except Conversations.DoesNotExist:
+        except Conversation.DoesNotExist:
             return Response(
                 {"error": "No conversations found"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -135,7 +148,7 @@ class ConversationView(APIView):
         other_user_user_profile = get_object_or_404(UserProfile, user=other_user)
         user_profile = get_user_profile(request.user)
         try:
-            conversation = Conversations.objects.create(
+            conversation = Conversation.objects.create(
                 user=user_profile, other_user=other_user_user_profile
             )
             return Response(
@@ -163,7 +176,7 @@ class SearchView(APIView):
             conversations = search_conversations(query, current_user_profile)
             new_contacts = search_new_contacts(query, conversations)
         else:
-            conversations = Conversations.objects.filter(
+            conversations = Conversation.objects.filter(
                 Q(user=current_user_profile) | Q(other_user=current_user_profile)
             ).distinct()
 
@@ -182,9 +195,9 @@ class MessageView(APIView):
     def get(self, request):
         conversation_id = request.GET.get("conversationId")
         if conversation_id is not None:
-            messages = Messages.objects.filter(
-                conversation_id=conversation_id
-            ).order_by("id")
+            messages = Message.objects.filter(conversation_id=conversation_id).order_by(
+                "id"
+            )
             if messages.exists():
                 return Response(
                     {
@@ -214,13 +227,13 @@ class MessageView(APIView):
         text = request.data.get("text")
         user_profile = get_user_profile(request.user)
 
-        conversation = Conversations.objects.get(id=conversation_id)
+        conversation = Conversation.objects.get(id=conversation_id)
 
         try:
-            Messages.objects.create(
+            Message.objects.create(
                 conversation=conversation, text=text, user=user_profile
             )
-            messages = Messages.objects.filter(conversation_id=conversation_id)
+            messages = Message.objects.filter(conversation_id=conversation_id)
             if messages.exists():
                 return Response(
                     {
@@ -254,7 +267,7 @@ class CheckNewMessagesView(APIView):
         try:
             conversation_id = int(conversation_id)
             last_message_id = int(last_message_id)
-            new_messages = Messages.objects.filter(
+            new_messages = Message.objects.filter(
                 conversation_id=conversation_id,
                 id__gt=last_message_id,
             ).order_by("id")
