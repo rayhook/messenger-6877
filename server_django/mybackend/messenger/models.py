@@ -5,15 +5,17 @@ app_label = "messenger"
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField("auth.User", on_delete=models.CASCADE)
 
 
 class Conversation(models.Model):
     user = models.ForeignKey(
-        UserProfile, related_name="user_conversation", on_delete=models.CASCADE
+        "messenger.UserProfile",
+        related_name="user_conversation",
+        on_delete=models.CASCADE,
     )
     other_user = models.ForeignKey(
-        UserProfile,
+        "messenger.UserProfile",
         related_name="other_user_conversation",
         on_delete=models.CASCADE,
         null=True,
@@ -22,7 +24,7 @@ class Conversation(models.Model):
 
 
 class Message(models.Model):
-    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
+    conversation = models.ForeignKey("messenger.Conversation", on_delete=models.CASCADE)
     text = models.TextField()
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True)
