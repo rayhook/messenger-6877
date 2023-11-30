@@ -1,9 +1,9 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
 import { ActiveChatContext } from "../../context/ActiveChatContext";
-import { axiosInstance } from "../../API/axiosConfig";
+import useGetNewMessages from "../../hooks/useGetNewMessages";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -30,39 +30,9 @@ const useStyles = makeStyles(() => ({
 
 const ActiveChat = () => {
   const classes = useStyles();
-  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
+  const { activeChat } = useContext(ActiveChatContext);
 
-  const fetchLastMessages = async (convoId, lastMessage) => {
-    const reqData = {
-      conversationId: convoId,
-      lastMessageId: lastMessage
-    };
-    const response = await axiosInstance.get("/messages/check-new/", { params: reqData });
-    let newMessages = response.data.new_messages;
-    let lastMessageId = response.data.last_message_id;
-    if (newMessages && newMessages.length > 0) {
-      setActiveChat((prevState) => ({
-        ...prevState,
-        messages: [...prevState.messages, ...newMessages],
-        lastMessageId
-      }));
-    }
-  };
-
-  useEffect(() => {
-    let intervalId;
-    if (activeChat.conversationId) {
-      intervalId = setInterval(
-        () => fetchLastMessages(activeChat.conversationId, activeChat.lastMessageId),
-        6000
-      );
-    }
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [activeChat.conversationId, activeChat.lastMessageId]);
+  useGetNewMessages(activeChat.conversationId, activeChat.lastMessageId);
 
   return (
     <Box className={classes.root}>
