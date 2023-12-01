@@ -5,15 +5,16 @@ import { axiosInstance } from "../API/axiosConfig";
 const useGetNewMessages = () => {
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
-  const getNewMessages = async (conversationId, lastMessageId) => {
+  const getNewMessages = async () => {
     const reqData = {
-      conversationId,
-      lastMessageId
+      conversationId: activeChat.conversationId,
+      lastMessageId: activeChat.lastMessageId
     };
 
     try {
       const response = await axiosInstance.get("/messages/check-new/", { params: reqData });
-      const { newMessages, last_message_id } = response.data;
+      const last_message_id = response.data.last_message_id;
+      const newMessages = response.data.new_messages;
 
       if (newMessages && newMessages.length > 0) {
         setActiveChat((prevState) => ({
@@ -30,10 +31,7 @@ const useGetNewMessages = () => {
   useEffect(() => {
     let intervalId;
     if (activeChat.conversationId) {
-      intervalId = setInterval(
-        () => getNewMessages(activeChat.conversationId, activeChat.lastMessageId),
-        6000
-      );
+      intervalId = setInterval(() => getNewMessages(), 500);
     }
     return () => {
       if (intervalId) {

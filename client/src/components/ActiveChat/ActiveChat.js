@@ -32,7 +32,7 @@ const ActiveChat = () => {
   const classes = useStyles();
   const { activeChat } = useContext(ActiveChatContext);
 
-  useGetNewMessages(activeChat.conversationId, activeChat.lastMessageId);
+  useGetNewMessages();
 
   return (
     <Box className={classes.root}>
