@@ -44,7 +44,7 @@ migrations/
 media/
 
 # Virtual environment
-server_django/firstenv/
+.venv
 
 # IDE
 .idea/
