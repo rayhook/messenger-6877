@@ -134,12 +134,15 @@ const Login = (props) => {
     const email = event.target.email.value;
     const password = event.target.password.value;
     const userData = { username, email, password };
-    const API_URL = "http://127.0.0.1:8000/messenger/";
+
     try {
-      let response = await axios.post(API_URL + "register/", userData);
+      let response = await axios.post(process.env.REACT_APP_API_URL + "register/", userData);
       if (response.status === 201) {
         try {
-          let loginResponse = await axios.post(API_URL + "login/", { username, password });
+          let loginResponse = await axios.post(process.env.REACT_APP_API_URL + "login/", {
+            username,
+            password
+          });
           localStorage.setItem("access", loginResponse.data.access);
           localStorage.setItem("refresh", loginResponse.data.refresh);
           setIsSignedup(true);

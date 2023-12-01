@@ -14,7 +14,6 @@ export const AuthContext = createContext({
 
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({ isLoggedIn: !!localStorage.getItem("access"), userId: null });
-  const API_URL = "http://127.0.0.1:8000/messenger/";
   const { setActiveChat } = useContext(ActiveChatContext);
 
   useEffect(() => {
@@ -22,7 +21,7 @@ export const AuthProvider = ({ children }) => {
       const accessToekn = localStorage.getItem("access");
       if (!accessToekn) return;
       try {
-        const response = await axios.post(API_URL + "api/token/validate/", {
+        const response = await axios.post(process.env.REACT_APP_API_URL + "api/token/validate/", {
           token: accessToekn
         });
         if (response.data.isValid) {
@@ -42,7 +41,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (userData) => {
     try {
-      const response = await axios.post(API_URL + "login/", userData);
+      const response = await axios.post(process.env.REACT_APP_API_URL + "login/", userData);
 
       localStorage.setItem("refresh", response.data.refresh);
       localStorage.setItem("access", response.data.access);
@@ -57,7 +56,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       const tokenData = { refresh: localStorage.getItem("refresh") };
-      await axios.post(API_URL + "logout/", tokenData);
+      await axios.post(process.env.REACT_APP_API_URL + "logout/", tokenData);
       localStorage.removeItem("access");
       localStorage.removeItem("refresh");
       localStorage.removeItem("userId");
