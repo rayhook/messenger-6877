@@ -194,33 +194,27 @@ class MessageView(APIView):
 
     def get(self, request):
         conversation_id = request.GET.get("conversationId")
-        if conversation_id is not None:
-            messages = Message.objects.filter(conversation_id=conversation_id).order_by(
-                "id"
-            )
-            if messages.exists():
-                return Response(
-                    {
-                        "user_id": get_user_profile(request.user).id,
-                        "messages": list(messages.values()),
-                        "last_message_id": get_last_message_id(messages),
-                    },
-                    status=status.HTTP_200_OK,
-                )
-            else:
-                return Response(
-                    {
-                        "user_id": get_user_profile(request.user).id,
-                        "messages": [],
-                        "last_message_id": None,
-                    },
-                    status=status.HTTP_200_OK,
-                )
-        else:
+        if conversation_id is None:
             return Response(
                 {"error": "No conversation Id provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        user_id = get_user_profile(request.user).id
+        messages = list(
+            Message.objects.filter(conversation_id=conversation_id)
+            .order_by("id")
+            .values
+        )
+        last_message_id = get_last_message_id(messages) if messages.exist() else None
+
+        return Response(
+            {
+                "user_id": user_id,
+                "messages": messages if messages.exist() else [],
+                "last_message_id": last_message_id,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     def post(self, request):
         conversation_id = request.data.get("conversation")
