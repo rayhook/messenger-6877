@@ -243,7 +243,7 @@ class MessageView(APIView):
             )
 
 
-class CheckNewMessagesView(APIView):
+class PollMessagesView(APIView):
     def get(self, request):
         conversation_id = request.GET.get("conversationId")
         last_message_id = request.GET.get("lastMessageId")

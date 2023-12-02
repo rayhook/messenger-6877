@@ -20,7 +20,7 @@ urlpatterns = [
     path("messages/", views.MessageView.as_view(), name="messages"),
     path(
         "messages/check-new/",
-        views.CheckNewMessagesView.as_view(),
+        views.PollMessagesView.as_view(),
         name="check_new_messages",
     ),
 ]
