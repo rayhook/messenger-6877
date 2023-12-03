@@ -200,17 +200,19 @@ class MessageView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         user_id = get_user_profile(request.user).id
-        messages = list(
-            Message.objects.filter(conversation_id=conversation_id)
-            .order_by("id")
-            .values
+        messages_query = Message.objects.filter(
+            conversation_id=conversation_id
+        ).order_by("id")
+
+        messages_exist = messages_query.exists()
+        last_message_id = (
+            get_last_message_id(messages_query) if messages_exist else None
         )
-        last_message_id = get_last_message_id(messages) if messages.exist() else None
 
         return Response(
             {
                 "user_id": user_id,
-                "messages": messages if messages.exist() else [],
+                "messages": list(messages_query.values()) if messages_exist else [],
                 "last_message_id": last_message_id,
             },
             status=status.HTTP_200_OK,
