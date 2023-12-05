@@ -53,6 +53,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signup = async (userData) => {
+    try {
+      const response = await axios.post(process.env.REACT_APP_API_URL + "register/", userData);
+      if (response.status === 201) {
+        login(userData);
+      } else {
+        console.error("Register failed", response.statusText);
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
   const logout = async () => {
     try {
       const tokenData = { refresh: localStorage.getItem("refresh") };
@@ -77,6 +90,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ login, logout, auth, setAuth }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ login, logout, signup, auth, setAuth }}>
+      {children}
+    </AuthContext.Provider>
   );
 };

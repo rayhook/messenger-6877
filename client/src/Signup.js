@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import {
   Grid,
@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import sideImg from "./resources/bg-img.png";
 import { ChatIcon } from "./resources/ChatIcon";
-import axios from "axios";
+import { AuthContext } from "./context/AuthContext";
 
 export const useStyles = makeStyles((theme) => ({
   mainContainer: {
@@ -124,8 +124,9 @@ export const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Login = (props) => {
+const Signup = () => {
   const history = useHistory();
+  const { signup } = useContext(AuthContext);
   const [isSignedup, setIsSignedup] = useState(false);
 
   const handleRegister = async (event) => {
@@ -133,29 +134,13 @@ const Login = (props) => {
     const username = event.target.username.value;
     const email = event.target.email.value;
     const password = event.target.password.value;
+
     const userData = { username, email, password };
 
-    try {
-      let response = await axios.post(process.env.REACT_APP_API_URL + "register/", userData);
-      if (response.status === 201) {
-        try {
-          let loginResponse = await axios.post(process.env.REACT_APP_API_URL + "login/", {
-            username,
-            password
-          });
-          localStorage.setItem("access", loginResponse.data.access);
-          localStorage.setItem("refresh", loginResponse.data.refresh);
-          setIsSignedup(true);
-        } catch (err) {
-          console.error("Login failed: ", err.message);
-        }
-      } else {
-        console.error("Register failed", response.statusText);
-      }
-    } catch (err) {
-      console.error(err.message);
-    }
+    await signup(userData);
+    setIsSignedup(true);
   };
+
   const loginRedirect = () => history.push("/login");
 
   const classes = useStyles();
@@ -303,4 +288,4 @@ export const Form = ({ handleAction, classes, formTitle, buttonText, type, Submi
   </Grid>
 );
 
-export default Login;
+export default Signup;
