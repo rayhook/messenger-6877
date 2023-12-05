@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
-from messenger.models import Conversation, UserProfile, Message
+from messenger.models import Conversation, Message
 from rest_framework_simplejwt.tokens import UntypedToken
 import logging
 
@@ -46,12 +46,11 @@ class RegisterView(APIView):
         user = User.objects.create_user(
             username=username, password=password, email=email
         )
-
-        user_profile = UserProfile(user=user)
-        user_profile.save()
+        user.save()
 
         return Response(
-            {"message": "User registered successfully"}, status=status.HTTP_201_CREATED
+            {"message": "User registered successfully"},
+            status=status.HTTP_201_CREATED,
         )
 
 
@@ -69,12 +68,11 @@ class LoginView(APIView):
             )
 
         refresh = RefreshToken.for_user(user)
-        user_profile = get_user_profile(user)
         return Response(
             {
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
-                "userId": user_profile.id,
+                "userId": user.id,
             },
             status=status.HTTP_200_OK,
         )
@@ -128,7 +126,7 @@ class ConversationView(APIView):
             conversation_with_username = format_conversation_with_username(
                 conversations
             )
-        except UserProfile.DoesNotExist:
+        except User.DoesNotExist:
             return Response(
                 {"error": "UserProfile doesnt exist"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -170,19 +168,18 @@ class SearchView(APIView):
 
     def get(self, request):
         query = request.query_params.get("search", "")
-        current_user_profile = get_user_profile(request.user)
+        user = request.user
+
         new_contacts = []
         if query:
-            conversations = search_conversations(query, current_user_profile)
+            conversations = search_conversations(query, user)
             new_contacts = search_new_contacts(query, conversations)
         else:
             conversations = Conversation.objects.filter(
-                Q(user=current_user_profile) | Q(other_user=current_user_profile)
+                Q(user1=user) | Q(user2=user)
             ).distinct()
 
-        conversation_list = format_conversation_list(
-            conversations, current_user_profile
-        )
+        conversation_list = format_conversation_list(conversations, user)
         return Response(
             {"conversation_list": conversation_list, "new_contacts": new_contacts},
             status=status.HTTP_200_OK,
@@ -199,7 +196,8 @@ class MessageView(APIView):
                 {"error": "No conversation Id provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        user_id = get_user_profile(request.user).id
+        # TODO: is conversation_id=conversation_id correct? isn't it conversation=conversation_id
+        user_id = request.user.id
         messages_query = Message.objects.filter(
             conversation_id=conversation_id
         ).order_by("id")
@@ -221,13 +219,12 @@ class MessageView(APIView):
     def post(self, request):
         conversation_id = request.data.get("conversation")
         text = request.data.get("text")
-        user_profile = get_user_profile(request.user)
 
         conversation = Conversation.objects.get(id=conversation_id)
 
         try:
             Message.objects.create(
-                conversation=conversation, text=text, user=user_profile
+                conversation=conversation, text=text, user=request.user
             )
             messages = Message.objects.filter(conversation_id=conversation_id)
             if messages.exists():

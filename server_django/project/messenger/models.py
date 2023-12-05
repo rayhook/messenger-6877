@@ -1,22 +1,18 @@
 from django.db import models
-from django.contrib.auth.models import User
+
 
 app_label = "messenger"
 
 
-class UserProfile(models.Model):
-    user = models.OneToOneField("auth.User", on_delete=models.CASCADE)
-
-
 class Conversation(models.Model):
-    user = models.ForeignKey(
-        "messenger.UserProfile",
-        related_name="user_conversation",
+    user1 = models.ForeignKey(
+        "auth.User",
+        related_name="user1",
         on_delete=models.CASCADE,
     )
-    other_user = models.ForeignKey(
-        "messenger.UserProfile",
-        related_name="other_user_conversation",
+    user2 = models.ForeignKey(
+        "auth.User",
+        related_name="user2",
         on_delete=models.CASCADE,
         null=True,
     )
@@ -26,5 +22,5 @@ class Conversation(models.Model):
 class Message(models.Model):
     conversation = models.ForeignKey("messenger.Conversation", on_delete=models.CASCADE)
     text = models.TextField()
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user = models.ForeignKey("auth.user", on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True)
