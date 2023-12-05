@@ -31,7 +31,7 @@ const useGetNewMessages = () => {
   useEffect(() => {
     let intervalId;
     if (activeChat.conversationId) {
-      intervalId = setInterval(() => getNewMessages(), 500);
+      intervalId = setInterval(() => getNewMessages(), 7000);
     }
     return () => {
       if (intervalId) {
