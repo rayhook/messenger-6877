@@ -121,8 +121,7 @@ class ConversationView(APIView):
 
     def get(self, request):
         try:
-            user_profile = request.user.userprofile
-            conversations = get_conversations(user_profile)
+            conversations = get_conversations(request.user)
             conversation_with_username = format_conversation_with_username(
                 conversations
             )
@@ -141,17 +140,15 @@ class ConversationView(APIView):
         )
 
     def post(self, request):
-        other_user_username = request.data.get("otherUser")
-        other_user = get_object_or_404(User, username=other_user_username)
-        other_user_user_profile = get_object_or_404(UserProfile, user=other_user)
-        user_profile = get_user_profile(request.user)
+        user2_username = request.data.get("otherUser")
+        other_user = get_object_or_404(User, username=user2_username)
         try:
             conversation = Conversation.objects.create(
-                user=user_profile, other_user=other_user_user_profile
+                user1=request.user, user2=other_user
             )
             return Response(
                 {
-                    "user_id": user_profile.id,
+                    "user_id": request.user.id,
                     "conversation_id": conversation.id,
                 },
                 status=status.HTTP_201_CREATED,
@@ -196,7 +193,6 @@ class MessageView(APIView):
                 {"error": "No conversation Id provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # TODO: is conversation_id=conversation_id correct? isn't it conversation=conversation_id
         user_id = request.user.id
         messages_query = Message.objects.filter(
             conversation_id=conversation_id
