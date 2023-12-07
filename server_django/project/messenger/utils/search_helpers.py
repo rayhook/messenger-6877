@@ -14,7 +14,7 @@ def search_conversations(query, user):
 
 
 def search_new_contacts(query, conversations):
-    existing_contact_ids = [c.user.id for c in conversations] + [
+    existing_contact_ids = [c.user1.id for c in conversations] + [
         c.user2.id for c in conversations
     ]
     new_contacts = User.objects.exclude(id__in=existing_contact_ids).filter(
@@ -32,9 +32,9 @@ def format_conversation_list(conversations, user):
     conversation_list = [
         {
             "id": conversation.id,
-            "with_user": conversation.user1.username
+            "with_user": conversation.user2.username
             if conversation.user1 == user
-            else conversation.user2.username,
+            else conversation.user1.username,
             "timestamp": conversation.timestamp,
         }
         for conversation in conversations
