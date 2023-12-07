@@ -1,19 +1,19 @@
 from messenger.models import Conversation
 
 
-def get_conversations(user_profile):
-    return Conversation.objects.filter(user=user_profile).prefetch_related("user__user")
+def get_conversations(user):
+    return Conversation.objects.filter(user1=user)
 
 
 def format_conversation_with_username(conversations):
     conversation_with_username = []
-    for convo in conversations:
+    for conversation in conversations:
         conversation_with_username.append(
             {
-                "id": convo.id,
-                "user_id": convo.user.user.id,
-                "username": convo.user.user.username,
-                "timestamp": convo.timestamp,
+                "id": conversation.id,
+                "user_id": conversation.user1.id,
+                "username": conversation.user1.username,
+                "timestamp": conversation.timestamp,
             }
         )
     return conversation_with_username
