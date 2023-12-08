@@ -4,7 +4,14 @@ from django.db import models
 app_label = "messenger"
 
 
-class Conversation(models.Model):
+class BaseModel(models.Model):
+    created_timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
+class Conversation(BaseModel):
     user1 = models.ForeignKey(
         "auth.User",
         related_name="user1",
@@ -16,11 +23,9 @@ class Conversation(models.Model):
         on_delete=models.CASCADE,
         null=True,
     )
-    timestamp = models.DateTimeField(auto_now=True, auto_now_add=False)
 
 
-class Message(models.Model):
+class Message(BaseModel):
     conversation = models.ForeignKey("messenger.Conversation", on_delete=models.CASCADE)
     text = models.TextField()
     user = models.ForeignKey("auth.user", on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now=True)

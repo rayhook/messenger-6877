@@ -23,7 +23,7 @@ const Messages = () => {
     <Box>
       {activeChat.messages &&
         activeChat.messages.map((message) => {
-          const time = moment(message.timestamp).format("h:mm");
+          const time = moment(message.created_timestamp).format("h:mm");
           if (message.user_id === auth.userId) {
             return <SenderBubble key={message.id} text={message.text} time={time} />;
           } else {

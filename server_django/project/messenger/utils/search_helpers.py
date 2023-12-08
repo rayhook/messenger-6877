@@ -35,7 +35,7 @@ def format_conversation_list(conversations, user):
             "with_user": conversation.user2.username
             if conversation.user1 == user
             else conversation.user1.username,
-            "timestamp": conversation.timestamp,
+            "timestamp": conversation.created_timestamp,
         }
         for conversation in conversations
     ]
