@@ -30,7 +30,7 @@ const Sidebar = ({ handleChange, conversations, newContacts, searchTerm, handleS
         ? conversations.map((convo) => (
             <Chat
               key={`convo-${convo.id}`}
-              otherUser={convo.with_user}
+              user2={convo.with_user}
               id={`convo-${convo.id}`}
               handleSelectChat={handleSelectChat}
             ></Chat>
@@ -41,7 +41,7 @@ const Sidebar = ({ handleChange, conversations, newContacts, searchTerm, handleS
           ].map((chat) => (
             <Chat
               key={chat.id}
-              otherUser={chat.with_user}
+              user2={chat.with_user}
               id={chat.id}
               handleSelectChat={handleSelectChat}
             ></Chat>

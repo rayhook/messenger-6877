@@ -4,7 +4,7 @@ import { axiosInstance } from "../../API/axiosConfig";
 import { ActiveChatContext } from "../../context/ActiveChatContext";
 import { AuthContext } from "../../context/AuthContext";
 
-const SidebarContainer = (props) => {
+const SidebarContainer = () => {
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
   const { setAuth } = useContext(AuthContext);
   const [searchTerm, setSearchTerm] = useState("");
@@ -44,7 +44,7 @@ const SidebarContainer = (props) => {
     }
   };
 
-  const handleSelectChat = async (id, otherUser) => {
+  const handleSelectChat = async (id, user2) => {
     const convoPrefix = id.slice(0, 4);
     const convoId = Number(id.slice(6));
     if (convoPrefix === "conv") {
@@ -67,7 +67,7 @@ const SidebarContainer = (props) => {
       }
     } else {
       try {
-        const response = await axiosInstance.post("/conversations/", { otherUser });
+        const response = await axiosInstance.post("/conversations/", { user2 });
         const userId = response.data.user_id;
         const conversationId = response.data.conversation_id;
         setActiveChat((prevState) => ({ ...prevState, conversationId }));

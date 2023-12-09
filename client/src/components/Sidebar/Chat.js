@@ -16,13 +16,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Chat = ({ id, otherUser, handleSelectChat }) => {
+const Chat = ({ id, user2, handleSelectChat }) => {
   const classes = useStyles();
 
   return (
-    <Box className={classes.root} onClick={() => handleSelectChat(id, otherUser)}>
-      <BadgeAvatar username={otherUser} online="true" sidebar={true} />
-      <ChatContent username={otherUser} />
+    <Box className={classes.root} onClick={() => handleSelectChat(id, user2)}>
+      <BadgeAvatar username={user2} online="true" sidebar={true} />
+      <ChatContent username={user2} />
     </Box>
   );
 };
