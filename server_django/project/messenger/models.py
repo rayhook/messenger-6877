@@ -26,6 +26,8 @@ class Conversation(BaseModel):
 
 
 class Message(BaseModel):
-    conversation = models.ForeignKey("messenger.Conversation", on_delete=models.CASCADE)
+    conversation = models.ForeignKey(
+        "messenger.Conversation", on_delete=models.CASCADE, related_name="messages"
+    )
     text = models.TextField()
     user = models.ForeignKey("auth.user", on_delete=models.CASCADE)

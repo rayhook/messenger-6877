@@ -13,7 +13,6 @@ from messenger.models import Conversation, Message
 from rest_framework_simplejwt.tokens import UntypedToken
 import logging
 
-from .utils.user_helpers import get_user_profile
 from .utils.conversation_helpers import (
     get_conversations,
     format_conversation_with_username,
@@ -193,10 +192,9 @@ class MessageView(APIView):
                 {"error": "No conversation Id provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        conversation = Conversation.objects.get(id=conversation_id)
         user_id = request.user.id
-        messages_query = Message.objects.filter(
-            conversation_id=conversation_id
-        ).order_by("id")
+        messages_query = conversation.messages.all().order_by("id")
 
         messages_exist = messages_query.exists()
         last_message_id = (
@@ -222,7 +220,8 @@ class MessageView(APIView):
             Message.objects.create(
                 conversation=conversation, text=text, user=request.user
             )
-            messages = Message.objects.filter(conversation_id=conversation_id)
+
+            messages = conversation.messages.all()
             if messages.exists():
                 return Response(
                     {
@@ -256,9 +255,10 @@ class PollMessagesView(APIView):
         try:
             conversation_id = int(conversation_id)
             last_message_id = int(last_message_id)
-            new_messages = Message.objects.filter(
-                conversation_id=conversation_id,
-                id__gt=last_message_id,
+            conversation = Conversation.objects.get(id=conversation_id)
+
+            new_messages = conversation.messages.filter(
+                id__gt=last_message_id
             ).order_by("id")
 
             if new_messages.exists():
