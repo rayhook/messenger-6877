@@ -139,12 +139,10 @@ class ConversationView(APIView):
         )
 
     def post(self, request):
-        user2_username = request.data.get("otherUser")
-        other_user = get_object_or_404(User, username=user2_username)
+        user2_username = request.data.get("user2")
+        user2 = get_object_or_404(User, username=user2_username)
         try:
-            conversation = Conversation.objects.create(
-                user1=request.user, user2=other_user
-            )
+            conversation = Conversation.objects.create(user1=request.user, user2=user2)
             return Response(
                 {
                     "user_id": request.user.id,
@@ -255,29 +253,22 @@ class PollMessagesView(APIView):
         try:
             conversation_id = int(conversation_id)
             last_message_id = int(last_message_id)
-            conversation = Conversation.objects.get(id=conversation_id)
-
-            new_messages = conversation.messages.filter(
-                id__gt=last_message_id
-            ).order_by("id")
-
-            if new_messages.exists():
-                last_message_id = new_messages.last().id
-                return Response(
-                    {
-                        "new_messages": list(new_messages.values()),
-                        "last_message_id": get_last_message_id(new_messages),
-                    },
-                    status=status.HTTP_200_OK,
-                )
-            else:
-                return Response(
-                    {"new_messages": [], "last_message_id": last_message_id},
-                    status=status.HTTP_200_OK,
-                )
-
         except ValueError:
             return Response(
                 {"error": "Invalid last message_Id or conversation_id"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        conversation = get_object_or_404(Conversation, id=conversation_id)
+
+        new_messages = conversation.messages.filter(id__gt=last_message_id).order_by(
+            "id"
+        )
+
+        last_message_id = new_messages.last().id if new_messages.exists() else None
+        return Response(
+            {
+                "new_messages": list(new_messages.values()),
+                "last_message_id": last_message_id,
+            },
+            status=status.HTTP_200_OK,
+        )
