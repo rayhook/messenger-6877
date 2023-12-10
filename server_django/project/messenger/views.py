@@ -13,16 +13,15 @@ from messenger.models import Conversation, Message
 from rest_framework_simplejwt.tokens import UntypedToken
 import logging
 
-from .utils.conversation_helpers import (
+from .logic.conversation_helpers import (
     get_conversations,
     format_conversation_with_username,
 )
-from .utils.search_helpers import (
+from .logic.search_helpers import (
     search_conversations,
     search_new_contacts,
     format_conversation_list,
 )
-from .utils.message_helpers import get_last_message_id
 
 
 JWT_authenticator = JWTAuthentication()
@@ -195,9 +194,7 @@ class MessageView(APIView):
         messages_query_sorted = conversation.messages.all().order_by("id")
 
         messages_exist = messages_query_sorted.exists()
-        last_message_id = (
-            get_last_message_id(messages_query_sorted) if messages_exist else None
-        )
+        last_message_id = messages_query_sorted.last().id if messages_exist else None
 
         return Response(
             {
@@ -226,7 +223,7 @@ class MessageView(APIView):
                 return Response(
                     {
                         "messages": list(messages.values()),
-                        "last_message_id": get_last_message_id(messages),
+                        "last_message_id": messages.last().id,
                     },
                     status=status.HTTP_201_CREATED,
                 )
@@ -277,7 +274,9 @@ class PollMessagesView(APIView):
             id__gt=last_message_id
         ).order_by("id")
 
-        last_message_id = new_messages_sorted.last().id
+        last_message_id = (
+            new_messages_sorted.last().id if new_messages_sorted.exists() else []
+        )
         return Response(
             {
                 "new_messages": list(new_messages_sorted.values()),
