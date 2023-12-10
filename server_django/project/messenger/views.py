@@ -192,17 +192,19 @@ class MessageView(APIView):
             )
         conversation = Conversation.objects.get(id=conversation_id)
         user_id = request.user.id
-        messages_query = conversation.messages.all().order_by("id")
+        messages_query_sorted = conversation.messages.all().order_by("id")
 
-        messages_exist = messages_query.exists()
+        messages_exist = messages_query_sorted.exists()
         last_message_id = (
-            get_last_message_id(messages_query) if messages_exist else None
+            get_last_message_id(messages_query_sorted) if messages_exist else None
         )
 
         return Response(
             {
                 "user_id": user_id,
-                "messages": list(messages_query.values()) if messages_exist else [],
+                "messages": list(messages_query_sorted.values())
+                if messages_exist
+                else [],
                 "last_message_id": last_message_id,
             },
             status=status.HTTP_200_OK,
@@ -242,7 +244,7 @@ class PollMessagesView(APIView):
 
         if conversation_id is None:
             return Response(
-                {"error": "Missing conversationId or lastMessageId"},
+                {"error": "Missing conversationId"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if conversation_id is not None and last_message_id is None:
@@ -252,22 +254,33 @@ class PollMessagesView(APIView):
 
         try:
             conversation_id = int(conversation_id)
-            last_message_id = int(last_message_id)
+
         except ValueError:
             return Response(
-                {"error": "Invalid last message_Id or conversation_id"},
+                {"error": "Invalid last conversation_id"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if last_message_id is not None:
+            try:
+                last_message_id = int(last_message_id)
+            except ValueError:
+                return Response(
+                    {"error": "Invalid last message_id"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        else:
+            last_message_id = None
+
         conversation = get_object_or_404(Conversation, id=conversation_id)
 
-        new_messages = conversation.messages.filter(id__gt=last_message_id).order_by(
-            "id"
-        )
+        new_messages_sorted = conversation.messages.filter(
+            id__gt=last_message_id
+        ).order_by("id")
 
-        last_message_id = new_messages.last().id if new_messages.exists() else None
+        last_message_id = new_messages_sorted.last().id
         return Response(
             {
-                "new_messages": list(new_messages.values()),
+                "new_messages": list(new_messages_sorted.values()),
                 "last_message_id": last_message_id,
             },
             status=status.HTTP_200_OK,
