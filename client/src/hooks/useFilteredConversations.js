@@ -17,14 +17,6 @@ const useFilteredConversations = (searchTerm, conversations, users) => {
       (user) => user.username.includes(searchTerm) && !conversationMap.has(user.id)
     );
 
-    console.log(
-      "userfilteredConversations/conversations? ",
-      conversations,
-      "filteredConversations? ",
-      filteredConversations,
-      "usersNotInConversations? ",
-      usersNotInConversations
-    );
     return [...filteredConversations, ...usersNotInConversations];
   }, [searchTerm, conversations, users]);
 };

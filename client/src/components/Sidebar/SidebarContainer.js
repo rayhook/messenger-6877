@@ -1,93 +1,44 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Sidebar } from "./index";
-import { axiosInstance } from "../../API/axiosConfig";
 import { ActiveChatContext } from "../../context/ActiveChatContext";
-import { AuthContext } from "../../context/AuthContext";
+import useFetchSearchResults from "../../hooks/useFetchSearchResults";
+import useFetchMessages from "../../hooks/useFetchMessages";
+import useCreateConversation from "../../hooks/useCreateConversation";
 
 const SidebarContainer = () => {
-  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
-  const { setAuth } = useContext(AuthContext);
+  const { activeChat } = useContext(ActiveChatContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const fetchSearchResults = useFetchSearchResults(searchTerm);
+  const fetchMessages = useFetchMessages();
+  const createConversation = useCreateConversation();
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      try {
-        const response = await axiosInstance.get(`search/?search=${searchTerm}`);
-        const conversations = response.data;
-        setActiveChat((prevState) => ({
-          ...prevState,
-          conversations: conversations.conversation_list,
-          newContacts: conversations.new_contacts
-        }));
-      } catch (error) {
-        console.error("Error fetching conversations", error.message);
-      }
+      fetchSearchResults();
       setIsLoading(false);
     };
     fetchData();
-  }, []);
+  }, [searchTerm]);
 
   const handleChange = async (event) => {
     setSearchTerm(event.target.value);
-    try {
-      const response = await axiosInstance.get(`search/?search=${event.target.value}`);
-      const conversations = response.data;
-      setActiveChat((prevState) => ({
-        ...prevState,
-        conversations: conversations.conversation_list,
-        newContacts: conversations.new_contacts
-      }));
-    } catch (error) {
-      console.error("Error fetching conversations", error.message);
-    }
+    fetchSearchResults();
   };
 
   const handleSelectChat = async (id, user2) => {
     const convoPrefix = id.slice(0, 4);
-    const convoId = Number(id.slice(6));
+    const conversaionId = Number(id.slice(6));
     if (convoPrefix === "conv") {
-      try {
-        const requestData = { conversationId: convoId };
-        const response = await axiosInstance.get("messages/", { params: requestData });
-
-        const messages = response.data.messages;
-        const userId = response.data.user_id;
-        const lastMessageId = response.data.last_message_id;
-        setActiveChat((prevState) => ({
-          ...prevState,
-          conversationId: convoId,
-          messages,
-          lastMessageId
-        }));
-        setAuth((prevState) => ({ ...prevState, userId: userId }));
-      } catch (error) {
-        console.error(`error fetching messages, ${error.message}`);
-      }
+      fetchMessages(conversaionId);
     } else {
-      try {
-        const response = await axiosInstance.post("/conversations/", { user2 });
-        const userId = response.data.user_id;
-        const conversationId = response.data.conversation_id;
-        setActiveChat((prevState) => ({ ...prevState, conversationId }));
-        setAuth((prevState) => ({ ...prevState, userId: userId }));
-      } catch (error) {
-        console.error(`error creating conversation ${error.message}`);
-      }
+      createConversation(user2);
     }
   };
 
-  if (!activeChat.conversations) {
+  if (!activeChat.conversations || isLoading) {
     return <>Loading</>;
-  }
-
-  // if (activeChat.conversations.length === 0) {
-  //   return <>No conversations</>;
-  // }
-
-  if (isLoading) {
-    return <>Loading...</>;
   }
 
   return (
