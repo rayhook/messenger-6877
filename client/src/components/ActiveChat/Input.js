@@ -83,7 +83,6 @@ const useStyles = makeStyles((theme) => ({
 const Input = (props) => {
   const classes = useStyles();
   const [text, setText] = useState("");
-  const { postMessage, otherUser } = props;
   const [imageURL, setImageURL] = useState([]);
   const [imageText, setImageText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -149,23 +148,6 @@ const Input = (props) => {
     });
     await Promise.all(fileURLs);
     setLoading(false);
-  };
-
-  const handleSendImage = async () => {
-    const reqBody = {
-      // text: imageText,
-      // recipientId: otherUser.id,
-      // conversationId,
-      // sender: conversationId ? null : user,
-      // attachments: imageURL
-    };
-
-    await postMessage(reqBody);
-    setImageText("");
-    setLoading(true);
-    setImageURL("");
-    setText("");
-    setOpen(false);
   };
 
   return (
@@ -259,7 +241,6 @@ const Input = (props) => {
                       className={classes.dialogInputButton}
                       variant="contained"
                       color="primary"
-                      onClick={handleSendImage}
                       fullWidth
                     >
                       Send

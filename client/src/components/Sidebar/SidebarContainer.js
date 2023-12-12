@@ -6,7 +6,7 @@ import useFetchMessages from "../../hooks/useFetchMessages";
 import useCreateConversation from "../../hooks/useCreateConversation";
 
 const SidebarContainer = () => {
-  const { activeChat } = useContext(ActiveChatContext);
+  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const fetchSearchResults = useFetchSearchResults(searchTerm);
@@ -35,6 +35,7 @@ const SidebarContainer = () => {
     } else {
       createConversation(user2);
     }
+    setActiveChat((prevState) => ({ ...prevState, user2 }));
   };
 
   if (!activeChat.conversations || isLoading) {

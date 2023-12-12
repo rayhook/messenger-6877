@@ -1,6 +1,8 @@
 import { Box } from "@material-ui/core";
 import { BadgeAvatar, ChatContent } from "../Sidebar";
 import { makeStyles } from "@material-ui/core/styles";
+import { ActiveChatContext } from "../../context/ActiveChatContext";
+import { useContext } from "react";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Chat = ({ id, user2, handleSelectChat }) => {
   const classes = useStyles();
+  const { setActiveChat } = useContext(ActiveChatContext);
 
   return (
     <Box className={classes.root} onClick={() => handleSelectChat(id, user2)}>
