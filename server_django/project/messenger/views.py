@@ -162,7 +162,7 @@ class SearchView(APIView):
     def get(self, request):
         query = request.query_params.get("search", "")
         user = request.user
-
+        username = user.username
         new_contacts = []
         if query:
             conversations = search_conversations(query, user)
@@ -174,7 +174,11 @@ class SearchView(APIView):
 
         conversation_list = format_conversation_list(conversations, user)
         return Response(
-            {"conversation_list": conversation_list, "new_contacts": new_contacts},
+            {
+                "username": username,
+                "conversation_list": conversation_list,
+                "new_contacts": new_contacts,
+            },
             status=status.HTTP_200_OK,
         )
 

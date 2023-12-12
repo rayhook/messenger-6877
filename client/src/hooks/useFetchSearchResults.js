@@ -8,8 +8,11 @@ const useFetchSearchResults = (searchTerm) => {
     try {
       const response = await axiosInstance.get(`search/?search=${searchTerm}`);
       const conversations = response.data;
+      const username = response.data.username;
+      console.log("username:", response.data.username);
       setActiveChat((prevState) => ({
         ...prevState,
+        username: username,
         conversations: conversations.conversation_list,
         newContacts: conversations.new_contacts
       }));
