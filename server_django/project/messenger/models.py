@@ -14,12 +14,12 @@ class BaseModel(models.Model):
 class Conversation(BaseModel):
     user1 = models.ForeignKey(
         "auth.User",
-        related_name="user1",
+        related_name="conversations_as_user1",
         on_delete=models.CASCADE,
     )
     user2 = models.ForeignKey(
         "auth.User",
-        related_name="user2",
+        related_name="conversations_as_user2",
         on_delete=models.CASCADE,
         null=True,
     )
