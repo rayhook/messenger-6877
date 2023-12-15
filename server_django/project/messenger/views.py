@@ -11,12 +11,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
 from messenger.models import Conversation, Message
 from rest_framework_simplejwt.tokens import UntypedToken
+from messenger.serializers import ConversationSerializer, MessageSerializer
 import logging
 
-from .logic.conversation_helpers import (
-    get_conversations,
-    format_conversation_with_username,
-)
+
 from .logic.search_helpers import (
     search_conversations,
     search_new_contacts,
@@ -118,42 +116,33 @@ class ConversationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            conversations = get_conversations(request.user)
-            conversation_with_username = format_conversation_with_username(
-                conversations
-            )
-        except User.DoesNotExist:
-            return Response(
-                {"error": "UserProfile doesnt exist"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Conversation.DoesNotExist:
-            return Response(
-                {"error": "No conversations found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        return Response(
-            {"conversations": conversation_with_username}, status=status.HTTP_200_OK
-        )
+        conversations = Conversation.objects.filter(user1=request.user)
+
+        if not conversations.exists():
+            return Response({"conversations": []}, status=status.HTTP_200_OK)
+
+        serializer = ConversationSerializer(conversations, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         user2_username = request.data.get("user2")
         user2 = get_object_or_404(User, username=user2_username)
-        try:
-            conversation = Conversation.objects.create(user1=request.user, user2=user2)
+
+        serializer_data = {"user1": request.user, "user2 ": user2}
+
+        serializer = ConversationSerializer(data=serializer_data)
+
+        if serializer.is_valid():
+            serializer.save()
             return Response(
                 {
                     "user_id": request.user.id,
-                    "conversation_id": conversation.id,
+                    "conversation_id": serializer.data["id"],
                 },
                 status=status.HTTP_201_CREATED,
             )
-        except Exception as e:
-            return Response(
-                {"error": "an error occured while creating the conversation"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SearchView(APIView):
@@ -193,19 +182,22 @@ class MessageView(APIView):
                 {"error": "No conversation Id provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        conversation = Conversation.objects.get(id=conversation_id)
+        conversation = get_object_or_404(Conversation, id=conversation_id)
         user_id = request.user.id
         messages_query_sorted = conversation.messages.all().order_by("id")
 
-        messages_exist = messages_query_sorted.exists()
-        last_message_id = messages_query_sorted.last().id if messages_exist else None
+        if messages_query_sorted.exists():
+            serializer = MessageSerializer(messages_query_sorted, many=True)
+            serializer_data = serializer.data
+            last_message_id = messages_query_sorted.last().id
+        else:
+            serializer_data = []
+            last_message_id = None
 
         return Response(
             {
                 "user_id": user_id,
-                "messages": list(messages_query_sorted.values())
-                if messages_exist
-                else [],
+                "messages": serializer_data,
                 "last_message_id": last_message_id,
             },
             status=status.HTTP_200_OK,
