@@ -249,6 +249,7 @@ class PollMessagesView(APIView):
                 {"error": "Missing conversationId"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        # the case where there are no messages in the conversation yet
         if conversation_id is not None and last_message_id is None:
             return Response(
                 {"new_messages": [], "last_message_id": None}, status=status.HTTP_200_OK
@@ -279,12 +280,17 @@ class PollMessagesView(APIView):
             id__gt=last_message_id
         ).order_by("id")
 
-        last_message_id = (
-            new_messages_sorted.last().id if new_messages_sorted.exists() else []
+        new_messages_sorted_serializer = MessageSerializer(
+            new_messages_sorted, many=True
         )
+
+        last_message_id = (
+            new_messages_sorted.last().id if new_messages_sorted.exists() else None
+        )
+
         return Response(
             {
-                "new_messages": list(new_messages_sorted.values()),
+                "new_messages": new_messages_sorted_serializer.data,
                 "last_message_id": last_message_id,
             },
             status=status.HTTP_200_OK,
