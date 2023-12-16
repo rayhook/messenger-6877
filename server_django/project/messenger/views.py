@@ -11,7 +11,12 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.db.models import Q
 from messenger.models import Conversation, Message
 from rest_framework_simplejwt.tokens import UntypedToken
-from messenger.serializers import ConversationSerializer, MessageSerializer
+from messenger.serializers import (
+    ConversationSerializer,
+    MessageSerializer,
+    SearchConversationSerializer,
+    NewContactSerializer,
+)
 import logging
 
 
@@ -151,7 +156,6 @@ class SearchView(APIView):
     def get(self, request):
         query = request.query_params.get("search", "")
         user = request.user
-        username = user.username
         new_contacts = []
         if query:
             conversations = search_conversations(query, user)
@@ -161,12 +165,17 @@ class SearchView(APIView):
                 Q(user1=user) | Q(user2=user)
             ).distinct()
 
-        conversation_list = format_conversation_list(conversations, user)
+        search_conversation_serializer = SearchConversationSerializer(
+            conversations, many=True, context={"request": request}
+        )
+
+        new_contact_serializer = NewContactSerializer(new_contacts, many=True)
+
         return Response(
             {
-                "username": username,
-                "conversation_list": conversation_list,
-                "new_contacts": new_contacts,
+                "username": user.username,
+                "conversation_list": search_conversation_serializer.data,
+                "new_contacts": new_contact_serializer.data,
             },
             status=status.HTTP_200_OK,
         )

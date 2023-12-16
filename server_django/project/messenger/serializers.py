@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from messenger.models import Conversation, Message
+from django.contrib.auth.models import User
 
 
 class ConversationSerializer(serializers.ModelSerializer):
@@ -13,6 +14,24 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     def get_username(self, obj):
         return obj.user1.username
+
+
+class SearchConversationSerializer(serializers.ModelSerializer):
+    with_user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Conversation
+        fields = ["id", "with_user", "created_timestamp"]
+        read_only_fields = []
+
+    def get_with_user(self, obj):
+        request_user = self.context["request"].user
+        return obj.user2.username if request_user == obj.user1 else obj.user1.usernmae
+
+
+class NewContactSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    with_user = serializers.CharField(source="username")
 
 
 class MessageSerializer(serializers.ModelSerializer):
