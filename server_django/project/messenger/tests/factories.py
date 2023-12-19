@@ -1,6 +1,6 @@
 import factory
 from django.contrib.auth.models import User
-from ..models import Conversation, Message
+from messenger.models import Conversation, Message
 
 
 class UserFactory(factory.django.DjangoModelFactory):
