@@ -22,16 +22,16 @@ class SearchConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
         fields = ["id", "with_user", "created_timestamp"]
-        read_only_fields = []
+        read_only_fields = ["id", "created_timestamp"]
 
     def get_with_user(self, obj):
         request_user = self.context["request"].user
-        return obj.user2.username if request_user == obj.user1 else obj.user1.usernmae
+        return obj.user2.username if request_user == obj.user1 else obj.user1.username
 
 
-class NewContactSerializer(serializers.ModelSerializer):
+class NewContactSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    with_user = serializers.CharField(source="username")
+    with_user = serializers.CharField()
 
 
 class MessageSerializer(serializers.ModelSerializer):

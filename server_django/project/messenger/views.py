@@ -133,7 +133,7 @@ class ConversationView(APIView):
         user2_username = request.data.get("user2")
         user2 = get_object_or_404(User, username=user2_username)
 
-        serializer_data = {"user1": request.user, "user2 ": user2}
+        serializer_data = {"user1": request.user.id, "user2": user2.id}
 
         serializer = ConversationSerializer(data=serializer_data)
 
@@ -171,11 +171,17 @@ class SearchView(APIView):
 
         new_contact_serializer = NewContactSerializer(new_contacts, many=True)
 
+        last_conversation_id = None
+        if conversations.exists():
+            last_conversation = conversations.latest("id")
+            last_conversation_id = last_conversation.id
+
         return Response(
             {
                 "username": user.username,
                 "conversation_list": search_conversation_serializer.data,
                 "new_contacts": new_contact_serializer.data,
+                "last_conversation_id": last_conversation_id,
             },
             status=status.HTTP_200_OK,
         )
