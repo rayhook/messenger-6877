@@ -23,8 +23,8 @@ import logging
 from .logic.search_helpers import (
     search_conversations,
     search_new_contacts,
-    format_conversation_list,
 )
+from .logic.poll_helpers import get_new_messages, get_new_conversations
 
 
 JWT_authenticator = JWTAuthentication()
@@ -157,24 +157,22 @@ class SearchView(APIView):
         query = request.query_params.get("search", "")
         user = request.user
         new_contacts = []
+        last_conversation_id = None
+        conversations = Conversation.objects.filter(
+            Q(user1=user) | Q(user2=user)
+        ).distinct()
+        if conversations.exists():
+            last_conversation = conversations.latest("id")
+            last_conversation_id = last_conversation.id
         if query:
             conversations = search_conversations(query, user)
             new_contacts = search_new_contacts(query, conversations)
-        else:
-            conversations = Conversation.objects.filter(
-                Q(user1=user) | Q(user2=user)
-            ).distinct()
 
         search_conversation_serializer = SearchConversationSerializer(
             conversations, many=True, context={"request": request}
         )
 
         new_contact_serializer = NewContactSerializer(new_contacts, many=True)
-
-        last_conversation_id = None
-        if conversations.exists():
-            last_conversation = conversations.latest("id")
-            last_conversation_id = last_conversation.id
 
         return Response(
             {
@@ -247,56 +245,27 @@ class MessageView(APIView):
 
 class PollMessagesView(APIView):
     def get(self, request):
+        user = request.user
         conversation_id = request.GET.get("conversationId")
         last_message_id = request.GET.get("lastMessageId")
+        last_conversation_id = request.GET.get("lastConversationId")
 
-        if conversation_id is None:
-            return Response(
-                {"error": "Missing conversationId"},
-                status=status.HTTP_400_BAD_REQUEST,
+        new_conversations, last_conversation_id = get_new_conversations(
+            user, last_conversation_id
+        )
+        if conversation_id:
+            new_messages, last_message_id = get_new_messages(
+                conversation_id, last_message_id
             )
-        # the case where there are no messages in the conversation yet
-        if conversation_id is not None and last_message_id is None:
-            return Response(
-                {"new_messages": [], "last_message_id": None}, status=status.HTTP_200_OK
-            )
-
-        try:
-            conversation_id = int(conversation_id)
-
-        except ValueError:
-            return Response(
-                {"error": "Invalid last conversation_id"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if last_message_id is not None:
-            try:
-                last_message_id = int(last_message_id)
-            except ValueError:
-                return Response(
-                    {"error": "Invalid last message_id"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
         else:
+            new_messages = []
             last_message_id = None
-
-        conversation = get_object_or_404(Conversation, id=conversation_id)
-
-        new_messages_sorted = conversation.messages.filter(
-            id__gt=last_message_id
-        ).order_by("id")
-
-        new_messages_sorted_serializer = MessageSerializer(
-            new_messages_sorted, many=True
-        )
-
-        last_message_id = (
-            new_messages_sorted.last().id if new_messages_sorted.exists() else None
-        )
 
         return Response(
             {
-                "new_messages": new_messages_sorted_serializer.data,
+                "new_conversations": new_conversations,
+                "last_conversation_id": last_conversation_id,
+                "new_messages": new_messages,
                 "last_message_id": last_message_id,
             },
             status=status.HTTP_200_OK,
