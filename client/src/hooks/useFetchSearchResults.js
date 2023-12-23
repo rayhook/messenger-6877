@@ -7,13 +7,13 @@ const useFetchSearchResults = (searchTerm) => {
   const fetchData = async () => {
     try {
       const response = await axiosInstance.get(`search/?search=${searchTerm}`);
-      const conversations = response.data;
-      const username = response.data.username;
+      console.log("lastConversationId?", response.data.last_conversation_id);
       setActiveChat((prevState) => ({
         ...prevState,
-        username: username,
-        conversations: conversations.conversation_list,
-        newContacts: conversations.new_contacts
+        username: response.data.username,
+        conversations: response.data.conversation_list,
+        newContacts: response.data.new_contacts,
+        lastConversationId: response.data.last_conversation_id
       }));
     } catch (error) {
       console.error("Error fetching conversations", error.message);

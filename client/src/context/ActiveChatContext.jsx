@@ -11,7 +11,8 @@ function ActiveChatProvider({ children }) {
     messages: [],
     users: [],
     user2: null,
-    lastMessageId: null
+    lastMessageId: null,
+    lastConversationId: null
   });
 
   return (
