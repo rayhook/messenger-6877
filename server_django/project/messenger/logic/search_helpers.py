@@ -4,13 +4,12 @@ from django.db.models import Q
 
 
 def search_conversations(query, user):
-    if query:
-        users = User.objects.filter(username__icontains=query)
-        conversations = Conversation.objects.filter(
-            Q(user1=user, user2__in=users) | Q(user2=user, user1__in=users)
-        ).distinct()
+    users = User.objects.filter(username__icontains=query)
+    conversations = Conversation.objects.filter(
+        Q(user1=user, user2__in=users) | Q(user2=user, user1__in=users)
+    ).distinct()
 
-        return conversations
+    return conversations
 
 
 def search_new_contacts(query, conversations):
