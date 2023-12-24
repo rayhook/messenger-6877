@@ -19,13 +19,12 @@ const useStyles = makeStyles(() => ({
 
 const Sidebar = ({ handleChange, conversations, newContacts, searchTerm, handleSelectChat }) => {
   const classes = useStyles();
-
+  console.log("sidebar/conversations?", conversations);
   return (
     <Box className={classes.root}>
       <CurrentUser />
       <Typography className={classes.title}>Chats</Typography>
       <Search handleChange={handleChange} searchTerm={searchTerm} />
-
       {searchTerm === ""
         ? conversations.map((convo) => (
             <Chat
