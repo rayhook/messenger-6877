@@ -251,7 +251,7 @@ class PollMessagesView(APIView):
         last_conversation_id = request.GET.get("lastConversationId")
 
         new_conversations, last_conversation_id = get_new_conversations(
-            user, last_conversation_id
+            user, last_conversation_id, request
         )
         if conversation_id:
             new_messages, last_message_id = get_new_messages(

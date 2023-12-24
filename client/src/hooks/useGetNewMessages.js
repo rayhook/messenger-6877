@@ -6,7 +6,6 @@ const useGetNewMessages = () => {
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
   const getNewMessages = async () => {
-    console.log("activeChat.conversationId", activeChat.conversationId);
     const reqData = {
       conversationId: activeChat.conversationId,
       lastMessageId: activeChat.lastMessageId,
@@ -14,19 +13,18 @@ const useGetNewMessages = () => {
     };
 
     try {
-      console.log("reqData", reqData);
       const response = await axiosInstance.get("/messages/check-new/", { params: reqData });
       const last_message_id = response.data.last_message_id;
       const last_conversation_id = response.data.last_conversation_id;
       const newMessages = response.data.new_messages;
       const newConversation = response.data.new_conversations;
 
-      console.log("newConversation", newConversation);
+      console.log("getNewMessage/response.data", response.data);
 
       if (newConversation && newConversation.length > 0) {
         setActiveChat((prevState) => ({
           ...prevState,
-          conversations: [...prevState.conversations, newConversation],
+          conversations: [...prevState.conversations, ...newConversation],
           messages: [...prevState.messages, ...newMessages],
           lastMessageId: last_message_id,
           lastConversationId: last_conversation_id
@@ -52,7 +50,7 @@ const useGetNewMessages = () => {
         clearInterval(intervalId);
       }
     };
-  }, [activeChat.conversationId, activeChat.lastMessageId]);
+  }, [activeChat.conversationId, activeChat.lastMessageId, activeChat.lastConversationId]);
 
   return { getNewMessages };
 };

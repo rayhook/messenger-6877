@@ -1,12 +1,16 @@
 from messenger.models import Message, Conversation
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from messenger.serializers import MessageSerializer, ConversationSerializer
+from messenger.serializers import (
+    MessageSerializer,
+    ConversationSerializer,
+    SearchConversationSerializer,
+)
 from rest_framework.response import Response
 from rest_framework import status
 
 
-def get_new_conversations(user, last_conversation_id):
+def get_new_conversations(user, last_conversation_id, request):
     # if no last conversation is passed, return all conversations
     last_conversation_id = int(last_conversation_id) if last_conversation_id else 0
 
@@ -17,8 +21,8 @@ def get_new_conversations(user, last_conversation_id):
         .distinct()
         .order_by("id")
     )
-    new_conversation_sorted_serializer = ConversationSerializer(
-        new_conversation_sorted_queryset, many=True
+    new_conversation_sorted_serializer = SearchConversationSerializer(
+        new_conversation_sorted_queryset, many=True, context={"request": request}
     )
     if new_conversation_sorted_queryset.exists():
         last_conversation_id = new_conversation_sorted_queryset.last().id
