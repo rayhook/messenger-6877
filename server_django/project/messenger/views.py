@@ -250,20 +250,28 @@ class PollMessagesView(APIView):
         last_message_id = request.GET.get("lastMessageId")
         last_conversation_id = request.GET.get("lastConversationId")
 
-        new_conversations, last_conversation_id = get_new_conversations(
-            user, last_conversation_id, request
+        new_conversation_sorted_queryset, last_conversation_id = get_new_conversations(
+            user, last_conversation_id
         )
+        new_conversations = SearchConversationSerializer(
+            new_conversation_sorted_queryset, many=True, context={"request": request}
+        )
+
         if conversation_id:
-            new_messages, last_message_id = get_new_messages(
+            new_messages_sorted_queryset, last_message_id = get_new_messages(
                 conversation_id, last_message_id
             )
+            new_messages_serlizer = MessageSerializer(
+                new_messages_sorted_queryset, many=True
+            )
+            new_messages = new_messages_serlizer.data
         else:
             new_messages = []
             last_message_id = None
 
         return Response(
             {
-                "new_conversations": new_conversations,
+                "new_conversations": new_conversations.data,
                 "last_conversation_id": last_conversation_id,
                 "new_messages": new_messages,
                 "last_message_id": last_message_id,
