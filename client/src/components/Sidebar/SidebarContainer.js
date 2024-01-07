@@ -32,7 +32,7 @@ const SidebarContainer = () => {
     if (convoPrefix === "conv") {
       fetchMessages(conversaionId);
     } else {
-      createConversation(user2);
+      createConversation(user2, searchTerm);
     }
     setActiveChat((prevState) => ({ ...prevState, user2 }));
   };
