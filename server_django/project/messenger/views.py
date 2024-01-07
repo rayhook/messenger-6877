@@ -130,6 +130,9 @@ class ConversationView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        user = request.user
+        query = request.data.get("query")
+        new_contacts = []
         user2_username = request.data.get("user2")
         user2 = get_object_or_404(User, username=user2_username)
 
@@ -139,10 +142,30 @@ class ConversationView(APIView):
 
         if serializer.is_valid():
             serializer.save()
+            conversations = Conversation.objects.filter(
+                Q(user1=user) | Q(user2=user)
+            ).distinct()
+
+            if conversations.exists():
+                last_conversation = conversations.latest("id")
+                last_conversation_id = last_conversation.id
+
+            if query:
+                conversations = search_conversations(query, user)
+                new_contacts = search_new_contacts(query, conversations)
+
+            search_conversation_serializer = SearchConversationSerializer(
+                conversations, many=True, context={"request": request}
+            )
+
+            new_contact_serializer = NewContactSerializer(new_contacts, many=True)
             return Response(
                 {
+                    "conversations_list": search_conversation_serializer.data,
+                    "new_contacts": new_contact_serializer.data,
                     "user_id": request.user.id,
                     "conversation_id": serializer.data["id"],
+                    "last_conversation_id": last_conversation_id,
                 },
                 status=status.HTTP_201_CREATED,
             )
