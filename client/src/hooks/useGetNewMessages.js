@@ -19,8 +19,6 @@ const useGetNewMessages = () => {
       const newMessages = response.data.new_messages;
       const newConversation = response.data.new_conversations;
 
-      console.log("getNewMessage/response.data", response.data);
-
       if (newConversation && newConversation.length > 0) {
         setActiveChat((prevState) => ({
           ...prevState,

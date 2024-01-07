@@ -19,7 +19,7 @@ const useStyles = makeStyles(() => ({
 
 const Sidebar = ({ handleChange, conversations, newContacts, searchTerm, handleSelectChat }) => {
   const classes = useStyles();
-  console.log("sidebar/conversations?", conversations);
+
   return (
     <Box className={classes.root}>
       <CurrentUser />
