@@ -24,7 +24,6 @@ const SidebarContainer = () => {
 
   const handleChange = async (event) => {
     setSearchTerm(event.target.value);
-    fetchSearchResults();
   };
 
   const handleSelectChat = async (id, user2) => {
