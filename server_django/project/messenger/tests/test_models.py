@@ -20,12 +20,12 @@ class TestModels(TestCase):
         user1 = UserFactory(username=username1)
         user2 = UserFactory(username=username2)
 
-        conversation = ConversationFactory(user1=user1, user2=user2)
+        conversation = ConversationFactory(id=60, user1=user1, user2=user2)
 
         # assertions
         self.assertEqual(Conversation.objects.count(), 1)
         self.assertEqual(conversation.user1, user1)
-        self.assertEqual(Conversation.objects.first().id, 1)
+        self.assertEqual(Conversation.objects.first().id, 60)
 
     def test_message_creation(self):
         conversation = ConversationFactory()
