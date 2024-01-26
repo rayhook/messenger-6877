@@ -84,3 +84,29 @@ class TestLogoutView(TestCase):
         data = response.json()
 
         self.assertEqual(data.get("message"), "Logged out successfully")
+
+
+class TestValidateTokenView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        username = "username"
+        password = "password"
+        self.user = UserFactory(username=username, password=password)
+        self.refresh_token = RefreshToken.for_user(self.user)
+
+    def test_invalid_token(self):
+        response = self.client.post(
+            reverse("token_validate"), {"token": "invalid token"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertEqual(data.get("isValid"), False)
+
+    def test_valid_token(self):
+        response = self.client.post(
+            reverse("token_validate"), {"token": str(self.refresh_token)}
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data.get("isValid"), True)
