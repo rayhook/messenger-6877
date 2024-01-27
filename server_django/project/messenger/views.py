@@ -121,7 +121,9 @@ class ConversationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        conversations = Conversation.objects.filter(user1=request.user)
+        conversations = Conversation.objects.filter(
+            Q(user1=request.user) | Q(user2=request.user)
+        )
 
         if not conversations.exists():
             return Response({"conversations": []}, status=status.HTTP_200_OK)
