@@ -1,7 +1,10 @@
 from django.test import TestCase, Client
+from rest_framework.test import APIClient
 from django.urls import reverse
 from messenger.tests.factories import UserFactory, ConversationFactory, MessageFactory
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from django.contrib.auth.models import User
 
 
 class TestRegisterView(TestCase):
@@ -110,3 +113,29 @@ class TestValidateTokenView(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data.get("isValid"), True)
+
+
+class TestConversationView(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.username = "user3"
+        self.password = "123456"
+        self.user = UserFactory(username=self.username, password=self.password)
+
+    def get_access_token(self):
+        response = self.client.post(
+            reverse("login"),
+            {"username": self.username, "password": self.password},
+        )
+
+        return response.json()["access"]
+
+    def test_conversation_is_empty(self):
+        token = self.get_access_token()
+
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
+
+        response = self.client.get(reverse("conversations"))
+
+        self.assertEqual(response.status_code, 200)
