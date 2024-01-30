@@ -1,10 +1,16 @@
+from django.contrib.auth.models import User
 from django.test import TestCase, Client
 from rest_framework.test import APIClient
 from django.urls import reverse
 from messenger.tests.factories import UserFactory, ConversationFactory, MessageFactory
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from django.contrib.auth.models import User
+from messenger.serializers import (
+    ConversationSerializer,
+    MessageSerializer,
+    SearchConversationSerializer,
+    NewContactSerializer,
+)
 
 
 class TestRegisterView(TestCase):
@@ -122,20 +128,38 @@ class TestConversationView(TestCase):
         self.username = "user3"
         self.password = "123456"
         self.user = UserFactory(username=self.username, password=self.password)
+        self.authenticate_with_access_token()
 
-    def get_access_token(self):
+    def authenticate_with_access_token(self):
         response = self.client.post(
             reverse("login"),
             {"username": self.username, "password": self.password},
         )
 
-        return response.json()["access"]
-
-    def test_conversation_is_empty(self):
-        token = self.get_access_token()
-
+        token = response.json()["access"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + token)
 
+    def test_authenticate_with_token(self):
         response = self.client.get(reverse("conversations"))
 
         self.assertEqual(response.status_code, 200)
+
+    def test_user_with_no_conversations(self):
+        response = self.client.get(reverse("conversations"))
+
+        data = response.json()
+
+        self.assertEqual(data.get("conversations"), [])
+
+    def test_conversations_exist(self):
+        user1 = self.user
+        user2 = UserFactory()
+        conversation = ConversationFactory(user1=user1, user2=user2)
+
+        response = self.client.get(reverse("conversations"))
+        data = response.json()
+
+        serialzer = ConversationSerializer(instance=conversation)
+        serialzer_data = serialzer.data
+
+        self.assertTrue(data, serialzer_data)
