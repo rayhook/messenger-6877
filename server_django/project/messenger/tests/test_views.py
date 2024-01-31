@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.test import TestCase, Client
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, force_authenticate
 from django.urls import reverse
 from messenger.tests.factories import UserFactory, ConversationFactory, MessageFactory
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -163,3 +163,48 @@ class TestConversationView(TestCase):
         serialzer_data = serialzer.data
 
         self.assertTrue(data, serialzer_data)
+
+    def test_create_conversation(self):
+        self.user1 = self.user
+        self.user2 = UserFactory()
+
+        request_data = {"user2": self.user2.username, "query": ""}
+        response = self.client.post(reverse("conversations"), request_data)
+        data = response.json()
+        self.assertEqual(response.status_code, 201)
+
+        conversation_list = data.get("conversations_list")
+
+        conversation_exists = any(
+            conv.get("with_user") == self.user2.username for conv in conversation_list
+        )
+        self.assertTrue(conversation_exists)
+        self.assertEqual(data.get("last_conversation_id"), conversation_list[0]["id"])
+
+
+class TestSearchView(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = UserFactory()
+
+        self.client.force_authenticate(user=self.user)
+
+    def test_search_users(self):
+        request_data = {"search": ""}
+
+        response = self.client.get(reverse("search"), request_data)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_users_in_search_result(self):
+        self.user1 = UserFactory(username="mary")
+        self.user2 = UserFactory(username="matt")
+        self.user3 = UserFactory(username="sean")
+
+        request_data = {"search": "m"}
+        response = self.client.get(reverse("search"), request_data)
+
+        data = response.json()
+        new_contacts = data.get("new_contacts")
+
+        self.assertTrue(self.user1.username and self.user2.username in new_contacts)
