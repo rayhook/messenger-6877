@@ -215,13 +215,13 @@ class MessageView(APIView):
 
     def get(self, request):
         conversation_id = request.GET.get("conversationId")
+        user_id = request.user.id
         if conversation_id is None:
             return Response(
                 {"error": "No conversation Id provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         conversation = get_object_or_404(Conversation, id=conversation_id)
-        user_id = request.user.id
         messages_query_sorted = conversation.messages.all().order_by("id")
 
         if messages_query_sorted.exists():
@@ -244,6 +244,18 @@ class MessageView(APIView):
     def post(self, request):
         conversation_id = request.data.get("conversation")
         text = request.data.get("text")
+
+        if conversation_id is None:
+            return Response(
+                {"error": "No conversation Id provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if text is None:
+            return Response(
+                {"error": "No text provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         conversation = Conversation.objects.get(id=conversation_id)
 

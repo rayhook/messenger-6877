@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+import factory
 from django.test import TestCase, Client
 from rest_framework.test import APIClient, force_authenticate
 from django.urls import reverse
@@ -196,15 +196,115 @@ class TestSearchView(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    def test_users_in_search_result(self):
+    def test_search_new_contacts(self):
         self.user1 = UserFactory(username="mary")
         self.user2 = UserFactory(username="matt")
         self.user3 = UserFactory(username="sean")
 
         request_data = {"search": "m"}
         response = self.client.get(reverse("search"), request_data)
-
         data = response.json()
+
         new_contacts = data.get("new_contacts")
 
-        self.assertTrue(self.user1.username and self.user2.username in new_contacts)
+        # filteres new_contacts correctly
+        new_contacts_usernames = [contact["with_user"] for contact in new_contacts]
+        self.assertIn(self.user1.username, new_contacts_usernames)
+        self.assertIn(self.user2.username, new_contacts_usernames)
+        self.assertTrue(self.user3.username not in new_contacts_usernames)
+
+    def test_search_conversations(self):
+        self.user1 = UserFactory(username="mary")
+        self.user2 = UserFactory(username="matt")
+        self.user3 = UserFactory(username="sean")
+
+        ConversationFactory(user1=self.user1, user2=self.user)
+        ConversationFactory(user1=self.user2, user2=self.user)
+        ConversationFactory(user1=self.user3, user2=self.user)
+
+        request_data = {"search": "m"}
+        response = self.client.get(reverse("search"), request_data)
+        data = response.json()
+
+        conversation_list = data.get("conversation_list")
+        conversation_list_usernames = [
+            convo["with_user"] for convo in conversation_list
+        ]
+        self.assertIn(self.user1.username, conversation_list_usernames)
+        self.assertIn(self.user3.username, conversation_list_usernames)
+
+    def test_last_conversation_id(self):
+        self.user1 = UserFactory(username="mary")
+        self.user2 = UserFactory(username="matt")
+        self.user3 = UserFactory(username="sean")
+
+        ConversationFactory(user1=self.user1, user2=self.user)
+        ConversationFactory(user1=self.user2, user2=self.user)
+        conversation_3 = ConversationFactory(user1=self.user3, user2=self.user)
+
+        response = self.client.get(reverse("search"))
+        data = response.json()
+
+        last_conversation_id = data.get("last_conversation_id")
+        self.assertEqual(last_conversation_id, conversation_3.id)
+
+
+class MessageViewTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = UserFactory()
+        self.user2 = UserFactory()
+        self.client.force_authenticate(self.user)
+
+    def test_missing_conversation_id(self):
+        response = self.client.get(reverse("messages"))
+        self.assertEqual(response.status_code, 400)
+
+    def test_incorrect_conversation_id(self):
+        response = self.client.get(reverse("messages"), {"conversationId": "12"})
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_messages_in_conversation(self):
+        self.conversation = ConversationFactory(user1=self.user, user2=self.user2)
+        self.text1 = "how are you today?"
+
+        self.message = MessageFactory(
+            conversation=self.conversation, user=self.user, text=self.text1
+        )
+
+        response = self.client.get(
+            reverse("messages"), {"conversationId": self.conversation.id}
+        )
+
+        data = response.json()
+        messages = data.get("messages")
+        messages_text = [message["text"] for message in messages]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            self.text1,
+            messages_text,
+        )
+        self.assertEqual(data.get("user_id"), self.user.id)
+
+    def test_create_messages_missing_params(self):
+        response = self.client.post(reverse("messages"))
+        data = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data.get("error"), "No conversation Id provided")
+
+    def test_create_messages(self):
+        self.conversation = ConversationFactory(user1=self.user, user2=self.user2)
+        self.text = "good morning"
+        request_data = {"conversation": self.conversation.id, "text": self.text}
+
+        response = self.client.post(reverse("messages"), request_data)
+
+        data = response.json()
+        messages = data.get("messages")
+        messages_texts = [message["text"] for message in messages]
+
+        self.assertEqual(response.status_code, 201)
+        self.assertIn(self.text, messages_texts)
+        last_message_id = data.get("last_message_id")
+        self.assertEqual(last_message_id, messages[-1]["id"])
