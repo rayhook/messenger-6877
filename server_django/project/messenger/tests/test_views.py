@@ -308,3 +308,40 @@ class MessageViewTest(TestCase):
         self.assertIn(self.text, messages_texts)
         last_message_id = data.get("last_message_id")
         self.assertEqual(last_message_id, messages[-1]["id"])
+
+
+class TestPollMessagesView(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = UserFactory()
+        self.client.force_authenticate(self.user)
+
+    def test_poll_new_messages(self):
+        self.user2 = UserFactory()
+        self.user3 = UserFactory()
+        self.conversation1 = ConversationFactory(user1=self.user, user2=self.user2)
+        self.conversation2 = ConversationFactory(user1=self.user, user2=self.user2)
+        self.text1 = "Hi"
+        self.text2 = "How are you?"
+        self.message1 = MessageFactory(
+            conversation=self.conversation1, user=self.user, text=self.text1
+        )
+        self.message2 = MessageFactory(
+            conversation=self.conversation1, user=self.user, text=self.text2
+        )
+
+        request_data = {
+            "conversationId": self.conversation1.id,
+            "lastMessageId": self.message1.id,
+            "lastConversationId": self.conversation1.id,
+        }
+        response = self.client.get(reverse("check_new_messages"), request_data)
+        data = response.json()
+        last_conversation_id = data.get("last_conversation_id")
+        new_messages = data.get("new_messages")
+
+        new_message_texts = [msg["text"] for msg in new_messages]
+
+        self.assertEqual(last_conversation_id, self.conversation2.id)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.message2.text, new_message_texts)
