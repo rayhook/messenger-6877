@@ -3,6 +3,7 @@ import { Route, Switch, withRouter } from "react-router-dom";
 import Signup from "./Signup.js";
 import Login from "./Login.js";
 import { Home, SnackbarError } from "./components";
+import { Redirect } from "react-router-dom/cjs/react-router-dom.min.js";
 
 const Routes = (props) => {
   // const { user, fetchUser } = props;
@@ -23,6 +24,7 @@ const Routes = (props) => {
         <Route path="/login" component={Login} />
         <Route path="/register" component={Signup} />
         <Route path="/home" component={Home} />
+        <Redirect from="/" to="login" exact />
       </Switch>
     </>
   );
