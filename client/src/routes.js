@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Route, Switch, withRouter } from "react-router-dom";
+import React, { useState } from "react";
+import { Route, Switch } from "react-router-dom";
 import Signup from "./Signup.js";
 import Login from "./Login.js";
 import { Home, SnackbarError } from "./components";
 import { Redirect } from "react-router-dom/cjs/react-router-dom.min.js";
 
 const Routes = (props) => {
-  // const { user, fetchUser } = props;
-
   const [errorMessage, setErrorMessage] = useState("");
   const [snackBarOpen, setSnackBarOpen] = useState(false);
 
