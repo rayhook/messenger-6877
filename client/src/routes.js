@@ -6,7 +6,7 @@ import { Home, SnackbarError } from "./components";
 import { Redirect } from "react-router-dom/cjs/react-router-dom.min.js";
 
 const Routes = (props) => {
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage] = useState("");
   const [snackBarOpen, setSnackBarOpen] = useState(false);
 
   return (
