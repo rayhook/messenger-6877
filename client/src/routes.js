@@ -1,35 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Route, Switch, withRouter } from "react-router-dom";
-import { connect } from "react-redux";
-import { fetchUser } from "./store/utils/thunkCreators";
+import React, { useState } from "react";
+import { Route, Switch } from "react-router-dom";
 import Signup from "./Signup.js";
 import Login from "./Login.js";
 import { Home, SnackbarError } from "./components";
+import { Redirect } from "react-router-dom/cjs/react-router-dom.min.js";
 
 const Routes = (props) => {
-  const { user, fetchUser } = props;
   const [errorMessage, setErrorMessage] = useState("");
   const [snackBarOpen, setSnackBarOpen] = useState(false);
-
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
-
-  useEffect(() => {
-    if (user.error) {
-      // check to make sure error is what we expect, in case we get an unexpected server error object
-      if (typeof user.error === "string") {
-        setErrorMessage(user.error);
-      } else {
-        setErrorMessage("Internal Server Error. Please try again");
-      }
-      setSnackBarOpen(true);
-    }
-  }, [user.error]);
-
-  if (props.user.isFetchingUser) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <>
@@ -43,29 +21,11 @@ const Routes = (props) => {
       <Switch>
         <Route path="/login" component={Login} />
         <Route path="/register" component={Signup} />
-        <Route
-          exact
-          path="/"
-          render={(props) => (props.user?.id ? <Home /> : <Signup />)}
-        />
         <Route path="/home" component={Home} />
+        <Redirect from="/" to="login" exact />
       </Switch>
     </>
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    fetchUser() {
-      dispatch(fetchUser());
-    },
-  };
-};
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Routes));
+export default Routes;

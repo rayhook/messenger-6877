@@ -19,9 +19,37 @@ yarn-debug.log*
 yarn-error.log*
 
 # env files
-server/.env
-client/.env
-/.vscode
+.env
+.vscode
 prettier.config.js
 
 
+# Python and Django
+*.pyo
+*.pyd
+*.pyc
+__pycache__/
+*.py[co]
+*.egg-info/
+dist/
+build/
+db.sqlite3
+
+# Django files
+*.log
+*.pot
+*.db
+db.sqlite3
+migrations/
+media/
+
+# Virtual environment
+.venv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak

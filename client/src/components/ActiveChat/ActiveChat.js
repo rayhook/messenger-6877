@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
-import { connect } from "react-redux";
+import { ActiveChatContext } from "../../context/ActiveChatContext";
+import useGetNewMessages from "../../hooks/useGetNewMessages";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -27,31 +28,20 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const ActiveChat = (props) => {
+const ActiveChat = () => {
   const classes = useStyles();
-  const { user } = props;
-  const conversation = props.conversation || {};
+  const { activeChat } = useContext(ActiveChatContext);
+
+  useGetNewMessages();
 
   return (
     <Box className={classes.root}>
-      {conversation.otherUser && (
+      {activeChat.conversationId && (
         <>
-          <Header
-            username={conversation.otherUser.username}
-            online={conversation.otherUser.online || false}
-          />
+          <Header username={activeChat.user2} online={true} />
           <Box className={classes.chatContainer}>
-            <Messages
-              messages={conversation.messages}
-              otherUser={conversation.otherUser}
-              userId={user.id}
-            />
-            <Input
-              className={classes.inputContainer}
-              otherUser={conversation.otherUser}
-              conversationId={conversation.id}
-              user={user}
-            />
+            <Messages />
+            <Input className={classes.inputContainer} />
           </Box>
         </>
       )}
@@ -59,15 +49,4 @@ const ActiveChat = (props) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user,
-    conversation:
-      state.conversations &&
-      state.conversations.find(
-        (conversation) => conversation.otherUser.username === state.activeConversation
-      )
-  };
-};
-
-export default connect(mapStateToProps, null)(ActiveChat);
+export default ActiveChat;

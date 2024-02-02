@@ -1,42 +1,55 @@
-import React, { useState } from "react";
-import { connect } from "react-redux";
+import React, { useState, useEffect, useContext } from "react";
 import { Sidebar } from "./index";
-import { searchUsers } from "../../store/utils/thunkCreators";
-import { clearSearchedUsers } from "../../store/conversations";
+import { ActiveChatContext } from "../../context/ActiveChatContext";
+import useFetchSearchResults from "../../hooks/useFetchSearchResults";
+import useFetchMessages from "../../hooks/useFetchMessages";
+import useCreateConversation from "../../hooks/useCreateConversation";
 
-const SidebarContainer = (props) => {
-  const { searchUsers, clearSearchedUsers } = props;
-
+const SidebarContainer = () => {
+  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const fetchSearchResults = useFetchSearchResults(searchTerm);
+  const fetchMessages = useFetchMessages();
+  const createConversation = useCreateConversation();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      fetchSearchResults();
+      setIsLoading(false);
+    };
+    fetchData();
+  }, [searchTerm]);
 
   const handleChange = async (event) => {
-    if (event.target.value === "") {
-      // clear searched convos from redux store
-      clearSearchedUsers();
-      setSearchTerm("");
-      return;
-    }
-    if (searchTerm.includes(event.target.value)) {
-      // if new value is included in search term, we don't need to make another API call, just need to set the search term value so the conversations can be filtered in the rendering
-      setSearchTerm(event.target.value);
-      return;
-    }
-    await searchUsers(event.target.value);
     setSearchTerm(event.target.value);
   };
 
-  return <Sidebar handleChange={handleChange} searchTerm={searchTerm} />;
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    searchUsers: (username) => {
-      dispatch(searchUsers(username));
-    },
-    clearSearchedUsers: () => {
-      dispatch(clearSearchedUsers());
+  const handleSelectChat = async (id, user2) => {
+    const convoPrefix = id.slice(0, 4);
+    const conversaionId = Number(id.slice(6));
+    if (convoPrefix === "conv") {
+      fetchMessages(conversaionId);
+    } else {
+      createConversation(user2, searchTerm);
     }
+    setActiveChat((prevState) => ({ ...prevState, user2 }));
   };
+
+  if (!activeChat.conversations || isLoading) {
+    return <>Loading</>;
+  }
+
+  return (
+    <Sidebar
+      handleChange={handleChange}
+      conversations={activeChat.conversations}
+      newContacts={activeChat.newContacts}
+      searchTerm={searchTerm}
+      handleSelectChat={handleSelectChat}
+    />
+  );
 };
 
-export default connect(null, mapDispatchToProps)(SidebarContainer);
+export default SidebarContainer;

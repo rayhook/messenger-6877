@@ -34,24 +34,11 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const SenderBubble = (props) => {
+const SenderBubble = ({ time, text }) => {
   const classes = useStyles();
-  const { time, text, attachments } = props;
   return (
     <Grid container direction="column" alignItems="flex-end" className={classes.root}>
       <Typography className={classes.date}>{time}</Typography>
-      {attachments && attachments[0] && (
-        <Grid
-          container
-          spacing={4}
-          direction="row-reverse"
-          className={
-            attachments.length > 1 ? classes.multiImageContainer : classes.imageGridContainer
-          }
-        >
-          <MutipleImages classes={classes} attachments={attachments} />
-        </Grid>
-      )}
       <Grid className={classes.bubble}>
         {text.length !== 0 && <Typography className={classes.text}>{text}</Typography>}
       </Grid>
@@ -60,9 +47,3 @@ const SenderBubble = (props) => {
 };
 
 export default SenderBubble;
-
-const MutipleImages = ({ attachments, classes }) => {
-  return attachments.map((URL) => (
-    <img key={URL} src={URL} className={classes.image} alt="Sender attachments" />
-  ));
-};

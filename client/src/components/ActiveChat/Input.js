@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   FormControl,
   Button,
@@ -15,9 +15,9 @@ import {
   Grid
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { connect } from "react-redux";
-import { postMessage } from "../../store/utils/thunkCreators";
 import axios from "axios";
+import { ActiveChatContext } from "../../context/ActiveChatContext";
+import { axiosInstance } from "../../API/axiosConfig";
 
 const useStyles = makeStyles((theme) => ({
   dashboard: {
@@ -83,11 +83,12 @@ const useStyles = makeStyles((theme) => ({
 const Input = (props) => {
   const classes = useStyles();
   const [text, setText] = useState("");
-  const { postMessage, otherUser, conversationId, user } = props;
   const [imageURL, setImageURL] = useState([]);
   const [imageText, setImageText] = useState("");
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
+
+  const { activeChat, setActiveChat } = useContext(ActiveChatContext);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -109,15 +110,22 @@ const Input = (props) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // add sender user info if posting to a brand new convo, so that the other user will have access to username, profile pic, etc.
     const reqBody = {
-      text: event.target.text.value,
-      recipientId: otherUser.id,
-      conversationId,
-      sender: conversationId ? null : user
+      conversation: activeChat.conversationId,
+      text: event.target.text.value
     };
-    await postMessage(reqBody);
-    setText("");
+
+    try {
+      const response = await axiosInstance.post("/messages/", reqBody);
+      setActiveChat((prevState) => ({
+        ...prevState,
+        messages: response.data.messages,
+        lastMessageId: response.data.last_message_id
+      }));
+      setText("");
+    } catch (error) {
+      console.error("Failed to send message", error.message);
+    }
   };
 
   const handleUpload = async (event) => {
@@ -140,23 +148,6 @@ const Input = (props) => {
     });
     await Promise.all(fileURLs);
     setLoading(false);
-  };
-
-  const handleSendImage = async () => {
-    const reqBody = {
-      text: imageText,
-      recipientId: otherUser.id,
-      conversationId,
-      sender: conversationId ? null : user,
-      attachments: imageURL
-    };
-
-    await postMessage(reqBody);
-    setImageText("");
-    setLoading(true);
-    setImageURL("");
-    setText("");
-    setOpen(false);
   };
 
   return (
@@ -250,7 +241,6 @@ const Input = (props) => {
                       className={classes.dialogInputButton}
                       variant="contained"
                       color="primary"
-                      onClick={handleSendImage}
                       fullWidth
                     >
                       Send
@@ -266,12 +256,4 @@ const Input = (props) => {
   );
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    postMessage: (message) => {
-      dispatch(postMessage(message));
-    }
-  };
-};
-
-export default connect(null, mapDispatchToProps)(Input);
+export default Input;

@@ -1,32 +1,36 @@
-import React from "react";
+import { useContext, useEffect, useRef } from "react";
 import { Box } from "@material-ui/core";
 import { SenderBubble, OtherUserBubble } from "../ActiveChat";
 import moment from "moment";
+import { ActiveChatContext } from "../../context/ActiveChatContext";
+import { AuthContext } from "../../context/AuthContext";
 
-const Messages = (props) => {
-  const { messages, otherUser, userId } = props;
+const Messages = () => {
+  const { activeChat } = useContext(ActiveChatContext);
+  const { auth } = useContext(AuthContext);
+
+  const lastMessageRef = useRef(null);
+
+  const scrollToBottom = () => {
+    lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [activeChat.messages]);
 
   return (
     <Box>
-      {messages.map((message) => {
-        const time = moment(message.createdAt).format("h:mm");
-        return message.senderId === userId ? (
-          <SenderBubble
-            key={message.id}
-            text={message.text}
-            time={time}
-            attachments={message.attachments}
-          />
-        ) : (
-          <OtherUserBubble
-            key={message.id}
-            text={message.text}
-            time={time}
-            otherUser={otherUser}
-            attachments={message.attachments}
-          />
-        );
-      })}
+      {activeChat.messages &&
+        activeChat.messages.map((message) => {
+          const time = moment(message.created_timestamp).format("h:mm");
+          if (message.user_id === auth.userId) {
+            return <SenderBubble key={message.id} text={message.text} time={time} />;
+          } else {
+            return <OtherUserBubble key={message.id} text={message.text} time={time} />;
+          }
+        })}
+      <div ref={lastMessageRef}></div>
     </Box>
   );
 };

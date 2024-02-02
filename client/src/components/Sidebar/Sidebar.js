@@ -1,7 +1,5 @@
-import React from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { connect } from "react-redux";
 import { Search, Chat, CurrentUser } from "./index.js";
 
 const useStyles = makeStyles(() => ({
@@ -19,29 +17,36 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const Sidebar = (props) => {
+const Sidebar = ({ handleChange, conversations, newContacts, searchTerm, handleSelectChat }) => {
   const classes = useStyles();
-  const conversations = props.conversations || [];
-  const { handleChange, searchTerm } = props;
 
   return (
     <Box className={classes.root}>
       <CurrentUser />
       <Typography className={classes.title}>Chats</Typography>
-      <Search handleChange={handleChange} />
-      {conversations
-        .filter((conversation) => conversation.otherUser.username.includes(searchTerm))
-        .map((conversation) => {
-          return <Chat conversation={conversation} key={conversation.otherUser.username} />;
-        })}
+      <Search handleChange={handleChange} searchTerm={searchTerm} />
+      {searchTerm === ""
+        ? conversations.map((convo) => (
+            <Chat
+              key={`convo-${convo.id}`}
+              user2={convo.with_user}
+              id={`convo-${convo.id}`}
+              handleSelectChat={handleSelectChat}
+            ></Chat>
+          ))
+        : [
+            ...conversations.map((convo) => ({ ...convo, id: `convo-${convo.id}` })),
+            ...newContacts.map((contact) => ({ ...contact, id: `contact-${contact.id}` }))
+          ].map((chat) => (
+            <Chat
+              key={chat.id}
+              user2={chat.with_user}
+              id={chat.id}
+              handleSelectChat={handleSelectChat}
+            ></Chat>
+          ))}
     </Box>
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    conversations: state.conversations
-  };
-};
-
-export default connect(mapStateToProps)(Sidebar);
+export default Sidebar;

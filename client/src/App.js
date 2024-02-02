@@ -1,21 +1,23 @@
 import React from "react";
 import { MuiThemeProvider } from "@material-ui/core";
 import { BrowserRouter } from "react-router-dom";
-import { Provider } from "react-redux";
-import store from "./store";
 
 import { theme } from "./themes/theme";
 import Routes from "./routes";
+import { ActiveChatProvider } from "./context/ActiveChatContext";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
-    <Provider store={store}>
-      <MuiThemeProvider theme={theme}>
-        <BrowserRouter>
-          <Routes />
-        </BrowserRouter>
-      </MuiThemeProvider>
-    </Provider>
+    <ActiveChatProvider>
+      <AuthProvider>
+        <MuiThemeProvider theme={theme}>
+          <BrowserRouter>
+            <Routes />
+          </BrowserRouter>
+        </MuiThemeProvider>
+      </AuthProvider>
+    </ActiveChatProvider>
   );
 }
 

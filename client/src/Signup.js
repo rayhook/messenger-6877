@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { connect } from "react-redux";
 import {
   Grid,
   Box,
@@ -10,9 +9,9 @@ import {
   makeStyles,
   Typography
 } from "@material-ui/core";
-import { register } from "./store/utils/thunkCreators";
 import sideImg from "./resources/bg-img.png";
 import { ChatIcon } from "./resources/ChatIcon";
+import { AuthContext } from "./context/AuthContext";
 
 export const useStyles = makeStyles((theme) => ({
   mainContainer: {
@@ -125,9 +124,10 @@ export const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Login = (props) => {
+const Signup = () => {
   const history = useHistory();
-  const { user, register } = props;
+  const { signup } = useContext(AuthContext);
+  const [isSignedup, setIsSignedup] = useState(false);
 
   const handleRegister = async (event) => {
     event.preventDefault();
@@ -135,12 +135,17 @@ const Login = (props) => {
     const email = event.target.email.value;
     const password = event.target.password.value;
 
-    await register({ username, email, password });
+    const userData = { username, email, password };
+
+    await signup(userData);
+    setIsSignedup(true);
   };
+
   const loginRedirect = () => history.push("/login");
 
   const classes = useStyles();
-  if (user.id) {
+
+  if (isSignedup) {
     return <Redirect to="/home" />;
   }
 
@@ -283,18 +288,4 @@ export const Form = ({ handleAction, classes, formTitle, buttonText, type, Submi
   </Grid>
 );
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    register: (credentials) => {
-      dispatch(register(credentials));
-    }
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default Signup;

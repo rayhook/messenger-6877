@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { connect } from "react-redux";
 import { BadgeAvatar } from "./index";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import { ActiveChatContext } from "../../context/ActiveChatContext";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -32,26 +32,19 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const CurrentUser = (props) => {
+const CurrentUser = () => {
   const classes = useStyles();
-
-  const user = props.user || {};
-
+  const { activeChat } = useContext(ActiveChatContext);
   return (
     <Box className={classes.root}>
-      <BadgeAvatar photoUrl={user.photoUrl} online={true} />
+      {/* <BadgeAvatar photoUrl={user.photoUrl} online={true} /> */}
       <Box className={classes.subContainer}>
-        <Typography className={classes.username}>{user.username}</Typography>
+        <BadgeAvatar online={true} />
+        <Typography className={classes.username}>{activeChat.username}</Typography>
         <MoreHorizIcon classes={{ root: classes.ellipsis }} />
       </Box>
     </Box>
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user
-  };
-};
-
-export default connect(mapStateToProps)(CurrentUser);
+export default CurrentUser;

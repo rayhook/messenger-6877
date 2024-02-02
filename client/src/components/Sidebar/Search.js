@@ -24,19 +24,19 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const Search = (props) => {
+const Search = ({ handleChange, searchTerm }) => {
   const classes = useStyles();
-  const { handleChange } = props;
 
   const handleSubmit = (event) => {
     event.preventDefault();
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <FormControl fullWidth hiddenLabel>
+    <form>
+      <FormControl onSubmit={handleSubmit} fullWidth hiddenLabel>
         <FilledInput
           name="search"
+          value={searchTerm}
           onChange={handleChange}
           classes={{ root: classes.filledInput, input: classes.input }}
           disableUnderline
@@ -45,7 +45,8 @@ const Search = (props) => {
             <InputAdornment position="start">
               <SearchIcon />
             </InputAdornment>
-          }></FilledInput>
+          }
+        ></FilledInput>
       </FormControl>
     </form>
   );

@@ -1,9 +1,6 @@
-import React from "react";
 import { Box } from "@material-ui/core";
 import { BadgeAvatar, ChatContent } from "../Sidebar";
 import { makeStyles } from "@material-ui/core/styles";
-import { setActiveChat } from "../../store/activeConversation";
-import { connect } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,34 +16,15 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Chat = (props) => {
+const Chat = ({ id, user2, handleSelectChat }) => {
   const classes = useStyles();
-  const { conversation } = props;
-  const { otherUser } = conversation;
-
-  const handleClick = async (conversation) => {
-    await props.setActiveChat(conversation.otherUser.username);
-  };
 
   return (
-    <Box onClick={() => handleClick(conversation)} className={classes.root}>
-      <BadgeAvatar
-        photoUrl={otherUser.photoUrl}
-        username={otherUser.username}
-        online={otherUser.online}
-        sidebar={true}
-      />
-      <ChatContent conversation={conversation} />
+    <Box className={classes.root} onClick={() => handleSelectChat(id, user2)}>
+      <BadgeAvatar username={user2} online="true" sidebar={true} />
+      <ChatContent username={user2} />
     </Box>
   );
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    setActiveChat: (id) => {
-      dispatch(setActiveChat(id));
-    }
-  };
-};
-
-export default connect(null, mapDispatchToProps)(Chat);
+export default Chat;

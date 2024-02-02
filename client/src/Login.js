@@ -1,27 +1,31 @@
-import React from "react";
+import { useContext } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { connect } from "react-redux";
 import { Grid } from "@material-ui/core";
-import { login } from "./store/utils/thunkCreators";
 
 import { LeftGrid, RightGrid } from "./Signup";
 import { useStyles } from "./Signup";
+import { AuthContext } from "./context/AuthContext";
 
-const Login = (props) => {
+const Login = () => {
   const history = useHistory();
-  const { user, login } = props;
+
+  const { auth, login } = useContext(AuthContext);
 
   const handleLogin = async (event) => {
     event.preventDefault();
     const username = event.target.username.value;
     const password = event.target.password.value;
 
-    await login({ username, password });
+    const userData = { username, password };
+
+    login(userData);
   };
+
   const registerRedirect = () => history.push("/register");
 
   const classes = useStyles();
-  if (user.id) {
+
+  if (auth.isLoggedIn) {
     return <Redirect to="/home" />;
   }
 
@@ -41,18 +45,4 @@ const Login = (props) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    login: (credentials) => {
-      dispatch(login(credentials));
-    }
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default Login;
