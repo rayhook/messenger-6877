@@ -1,10 +1,11 @@
-import { useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import { Grid, Box, Button, FormControl, TextField, Typography, Theme } from "@material-ui/core";
 import { makeStyles, createStyles } from "@material-ui/core/styles";
 import sideImg from "./resources/bg-img.png";
 import { ChatIcon } from "./resources/ChatIcon";
 import { AuthContext } from "./context/AuthContext";
+import { Classes } from "./types";
 
 export const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -124,7 +125,7 @@ const Signup = () => {
   const { signup } = useContext(AuthContext);
   const [isSignedup, setIsSignedup] = useState(false);
 
-  const handleRegister = async (event: Event) => {
+  const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.target as HTMLFormElement;
     const username = form.username.value;
@@ -162,7 +163,7 @@ const Signup = () => {
   );
 };
 
-export const LeftGrid = ({ classes }) => (
+export const LeftGrid = ({ classes }: { classes: Classes }) => (
   <Grid item className={classes.gridLeft}>
     <SideImgColumn classes={classes} />
   </Grid>
@@ -177,6 +178,15 @@ export const RightGrid = ({
   buttonText,
   formTitle,
   SubmitButtonText
+}: {
+  classes: Classes;
+  handleRedirect: () => void;
+  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  type: string;
+  title: string;
+  buttonText: string;
+  formTitle: string;
+  SubmitButtonText: string;
 }) => (
   <Grid item className={classes.gridRight}>
     <Box className={classes.loginRegisterFormContanier}>
@@ -197,7 +207,7 @@ export const RightGrid = ({
   </Grid>
 );
 
-export const SideImgColumn = ({ classes }) => (
+export const SideImgColumn = ({ classes }: { classes: Classes }) => (
   <Box className={classes.sideImgContainer}>
     <Box className={classes.iconTitleContainer}>
       <ChatIcon className={classes.ChatIcon} />
@@ -208,7 +218,17 @@ export const SideImgColumn = ({ classes }) => (
   </Box>
 );
 
-export const LoginRegister = ({ classes, handleRedirect, buttonText, title }) => (
+export const LoginRegister = ({
+  classes,
+  handleRedirect,
+  buttonText,
+  title
+}: {
+  classes: Classes;
+  handleRedirect: () => void;
+  buttonText: string;
+  title: string;
+}) => (
   <Grid className={classes.logingRegisterContainer}>
     <Box className={classes.LoginRegisterSubTitle} display={{ xs: "none", md: "block" }}>
       <Typography color="secondary" variant="subtitle1">
@@ -227,7 +247,19 @@ export const LoginRegister = ({ classes, handleRedirect, buttonText, title }) =>
   </Grid>
 );
 
-const FormContainer = ({ ariaLabel, label, name, type, inputProps }) => (
+const FormContainer = ({
+  ariaLabel,
+  label,
+  name,
+  type,
+  inputProps
+}: {
+  ariaLabel: string;
+  label: string;
+  name: string;
+  type: string;
+  inputProps?: { minLength: number };
+}) => (
   <Box>
     <FormControl>
       <TextField
@@ -243,7 +275,19 @@ const FormContainer = ({ ariaLabel, label, name, type, inputProps }) => (
   </Box>
 );
 
-export const Form = ({ handleAction, classes, formTitle, buttonText, type, SubmitButtonText }) => (
+export const Form = ({
+  handleAction,
+  classes,
+  formTitle,
+  type,
+  SubmitButtonText
+}: {
+  handleAction: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  classes: Classes;
+  formTitle: string;
+  type: string;
+  SubmitButtonText: string;
+}) => (
   <Grid>
     <Box className={classes.formTitleContainer}>
       <Box>
