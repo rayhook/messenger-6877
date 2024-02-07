@@ -1,5 +1,14 @@
 import { createTheme } from "@material-ui/core/styles";
 
+declare module "@material-ui/core/styles/createPalette" {
+  interface Palette {
+    bright: { main: string };
+  }
+  interface PaletteOptions {
+    bright: { main: string };
+  }
+}
+
 export const theme = createTheme({
   palette: {
     primary: { main: "#3A8DFF" },
