@@ -1,15 +1,7 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-  SetStateAction,
-  Dispatch
-} from "react";
+import { createContext, useContext, useEffect, useState, SetStateAction, Dispatch } from "react";
 import axios from "axios";
 import { ActiveChatContext } from "./ActiveChatContext";
-import { UserDataType } from "../types";
+import { UserDataType, ProviderProps } from "../types";
 
 interface AuthContextType {
   login: (userData: UserDataType) => Promise<void>;
@@ -20,10 +12,6 @@ interface AuthContextType {
   };
   setAuth: Dispatch<SetStateAction<{ isLoggedIn: boolean; userId: string | null }>>;
   signup: (userData: UserDataType) => Promise<void>;
-}
-
-interface AuthProviderProps {
-  children: ReactNode;
 }
 
 interface AuthState {
@@ -42,7 +30,7 @@ export const AuthContext = createContext<AuthContextType>({
   signup: async () => {}
 });
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
+export const AuthProvider = ({ children }: ProviderProps) => {
   const [auth, setAuth] = useState<AuthState>({
     isLoggedIn: !!localStorage.getItem("access"),
     userId: null

@@ -1,8 +1,9 @@
 import React, { createContext, useState } from "react";
+import { ProviderProps } from "../types";
 
 const ActiveChatContext = createContext(undefined);
 
-function ActiveChatProvider({ children }) {
+function ActiveChatProvider({ children }: ProviderProps) {
   const [activeChat, setActiveChat] = useState({
     username: null,
     conversations: [],
