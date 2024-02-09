@@ -50,7 +50,7 @@ export const theme = createTheme({
           fontSize: "1rem",
           width: "18rem"
         },
-        fontWeight: "800",
+        fontWeight: 800,
         paddingTop: "2rem",
         width: "28rem",
         height: "1rem",
