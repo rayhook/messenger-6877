@@ -2,12 +2,13 @@ import { useContext } from "react";
 import { axiosInstance } from "../API/axiosConfig";
 import { ActiveChatContext } from "../context/ActiveChatContext";
 
-const useFetchSearchResults = (searchTerm) => {
+const useFetchSearchResults = (searchTerm: string) => {
   const { setActiveChat } = useContext(ActiveChatContext);
 
   const fetchData = async () => {
     try {
       const response = await axiosInstance.get(`search/?search=${searchTerm}`);
+
       setActiveChat((prevState) => ({
         ...prevState,
         username: response.data.username,
