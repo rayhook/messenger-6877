@@ -1,17 +1,5 @@
 import React, { createContext, useState } from "react";
-import { ProviderProps } from "../types";
-
-interface ActiveChatState {
-  username: null | string; // define types here
-  conversations: []; // define types here
-  newContacts: []; // define types here
-  conversationId: null; // define types here
-  messages: []; // define types here
-  users: []; // define types here
-  user2: null; // define types here
-  lastMessageId: null;
-  lastConversationId: null;
-}
+import { ProviderProps, ActiveChatState } from "../types";
 
 interface ActiveChatContextType {
   activeChat: ActiveChatState;
