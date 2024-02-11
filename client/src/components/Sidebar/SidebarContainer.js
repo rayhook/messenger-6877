@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Sidebar } from "./index";
 import { ActiveChatContext } from "../../context/ActiveChatContext";
-import useFetchSearchResults from "../../hooks/useFetchSearchResults";
+import useFetchSearchResults from "../../hooks/useFetchSearchResults.ts";
 import useFetchMessages from "../../hooks/useFetchMessages";
 import useCreateConversation from "../../hooks/useCreateConversation";
 
