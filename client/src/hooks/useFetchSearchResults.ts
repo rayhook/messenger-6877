@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { axiosInstance } from "../API/axiosConfig";
 import { ActiveChatContext } from "../context/ActiveChatContext";
+import { reportError, getErrorMessage } from "../utils/catchError";
 
 const useFetchSearchResults = (searchTerm: string) => {
   const { setActiveChat } = useContext(ActiveChatContext);
@@ -8,7 +9,6 @@ const useFetchSearchResults = (searchTerm: string) => {
   const fetchData = async () => {
     try {
       const response = await axiosInstance.get(`search/?search=${searchTerm}`);
-
       setActiveChat((prevState) => ({
         ...prevState,
         username: response.data.username,
@@ -17,7 +17,10 @@ const useFetchSearchResults = (searchTerm: string) => {
         lastConversationId: response.data.last_conversation_id
       }));
     } catch (error) {
-      console.error("Error fetching conversations", error.message);
+      reportError({
+        customMessage: "Error fetching conversations",
+        message: getErrorMessage(error)
+      });
     }
   };
   return fetchData;
