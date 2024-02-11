@@ -19,14 +19,27 @@ export interface ConversationType {
   created_timestamp: string;
 }
 
+interface NewContactsType {
+  id: string;
+  with_user: string;
+}
+
+interface MessageType {
+  id: number;
+  conversation: number;
+  user: number;
+  text: string;
+  created_timestamp: string;
+}
+
 export interface ActiveChatState {
   username: null | string;
   conversations: ConversationType[];
-  newContacts: []; // define types here
-  conversationId: null; // define types here
-  messages: []; // define types here
+  newContacts: NewContactsType[];
+  conversationId: null | number;
+  messages: MessageType[] | null;
   users: []; // define types here
-  user2: null; // define types here
-  lastMessageId: null;
-  lastConversationId: null;
+  user2: null | string;
+  lastMessageId: null | number;
+  lastConversationId: null | string;
 }

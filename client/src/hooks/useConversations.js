@@ -11,7 +11,6 @@ const useConversations = () => {
       try {
         const response = await axiosInstance.get("conversations/");
         const conversations = response.data.conversations || [];
-        console.log("useConversation called?", "conversations", conversations);
         setActiveChat({ ...activeChat, conversations: conversations });
         setLoading(false);
       } catch (error) {

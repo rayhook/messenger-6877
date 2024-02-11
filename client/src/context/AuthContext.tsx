@@ -108,7 +108,6 @@ export const AuthProvider = ({ children }: ProviderProps) => {
         newContacts: [],
         conversationId: null,
         messages: [],
-        users: [],
         lastMessageId: null
       }));
     } catch (error) {
