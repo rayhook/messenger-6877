@@ -38,7 +38,6 @@ export interface ActiveChatState {
   newContacts: NewContactsType[];
   conversationId: null | number;
   messages: MessageType[] | null;
-  users: []; // define types here
   user2: null | string;
   lastMessageId: null | number;
   lastConversationId: null | string;
