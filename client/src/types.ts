@@ -19,8 +19,8 @@ export interface ConversationType {
   created_timestamp: string;
 }
 
-interface NewContactsType {
-  id: string;
+export interface NewContactsType {
+  id: number;
   with_user: string;
 }
 
@@ -41,4 +41,12 @@ export interface ActiveChatState {
   user2: null | string;
   lastMessageId: null | number;
   lastConversationId: null | string;
+}
+
+export interface SidebarProps {
+  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  conversations: ConversationType[];
+  newContacts: NewContactsType[];
+  searchTerm: string;
+  handleSelectChat: (id: string, user2: string) => Promise<void>;
 }
