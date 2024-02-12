@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const SenderBubble = ({ time, text }) => {
+const SenderBubble = ({ time, text }: { time: string; text: string }) => {
   const classes = useStyles();
   return (
     <Grid container direction="column" alignItems="flex-end" className={classes.root}>
