@@ -50,3 +50,9 @@ export interface SidebarProps {
   searchTerm: string;
   handleSelectChat: (id: string, user2: string) => Promise<void>;
 }
+
+export interface ChatProps {
+  user2: string;
+  id: string;
+  handleSelectChat: (id: string, user2: string) => Promise<void>;
+}
