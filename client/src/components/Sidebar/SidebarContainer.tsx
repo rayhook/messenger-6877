@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Sidebar } from "./index";
 import { ActiveChatContext } from "../../context/ActiveChatContext";
-import useFetchSearchResults from "../../hooks/useFetchSearchResults.ts";
+import useFetchSearchResults from "../../hooks/useFetchSearchResults";
 import useFetchMessages from "../../hooks/useFetchMessages";
 import useCreateConversation from "../../hooks/useCreateConversation";
 
@@ -22,11 +22,14 @@ const SidebarContainer = () => {
     fetchData();
   }, [searchTerm]);
 
-  const handleChange = async (event) => {
-    setSearchTerm(event.target.value);
+  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event === null) {
+    } else {
+      setSearchTerm(event.target.value);
+    }
   };
 
-  const handleSelectChat = async (id, user2) => {
+  const handleSelectChat = async (id: string, user2: string) => {
     const convoPrefix = id.slice(0, 4);
     const conversaionId = Number(id.slice(6));
     if (convoPrefix === "conv") {
