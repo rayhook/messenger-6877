@@ -26,9 +26,7 @@ const Home = () => {
 
   return (
     <>
-      <Button className={classes.logout} onClick={handleLogout}>
-        Logout
-      </Button>
+      <Button onClick={handleLogout}>Logout</Button>
       <Grid container component="main" className={classes.root}>
         <CssBaseline />
         <SidebarContainer />
