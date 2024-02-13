@@ -1,6 +1,6 @@
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Search, Chat, CurrentUser } from "./index.js";
+import { Search, Chat, CurrentUser } from "./index";
 import { SidebarProps } from "../../types.js";
 
 const useStyles = makeStyles(() => ({

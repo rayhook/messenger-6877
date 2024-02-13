@@ -1,4 +1,3 @@
-import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Typography, Grid } from "@material-ui/core";
 
@@ -37,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
 const SenderBubble = ({ time, text }: { time: string; text: string }) => {
   const classes = useStyles();
   return (
-    <Grid container direction="column" alignItems="flex-end" className={classes.root}>
+    <Grid container direction="column" alignItems="flex-end">
       <Typography className={classes.date}>{time}</Typography>
       <Grid className={classes.bubble}>
         {text.length !== 0 && <Typography className={classes.text}>{text}</Typography>}
