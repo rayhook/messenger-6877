@@ -8,7 +8,6 @@ import { AuthContext } from "../../context/AuthContext";
 const Messages = () => {
   const { activeChat } = useContext(ActiveChatContext);
   const { auth } = useContext(AuthContext);
-
   const lastMessageRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -24,7 +23,7 @@ const Messages = () => {
       {activeChat.messages &&
         activeChat.messages.map((message) => {
           const time = moment(message.created_timestamp).format("h:mm");
-          if (message.user_id === auth.userId) {
+          if (message.user === auth.userId) {
             return <SenderBubble key={message.id} text={message.text} time={time} />;
           } else {
             return <OtherUserBubble key={message.id} text={message.text} time={time} />;
