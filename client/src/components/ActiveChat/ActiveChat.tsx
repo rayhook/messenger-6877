@@ -36,7 +36,7 @@ const ActiveChat = () => {
 
   return (
     <Box className={classes.root}>
-      {activeChat.conversationId && (
+      {activeChat.conversationId && activeChat.user2 && (
         <>
           <Header username={activeChat.user2} online={true} />
           <Box className={classes.chatContainer}>
