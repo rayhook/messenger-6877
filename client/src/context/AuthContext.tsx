@@ -6,17 +6,14 @@ import { UserDataType, ProviderProps } from "../types";
 interface AuthContextType {
   login: (userData: UserDataType) => Promise<void>;
   logout: () => Promise<void>;
-  auth: {
-    isLoggedIn: boolean;
-    userId: null | string;
-  };
-  setAuth: Dispatch<SetStateAction<{ isLoggedIn: boolean; userId: string | null }>>;
+  auth: AuthState;
+  setAuth: Dispatch<SetStateAction<AuthState>>;
   signup: (userData: UserDataType) => Promise<void>;
 }
 
 interface AuthState {
   isLoggedIn: boolean;
-  userId: string | null;
+  userId: number | null;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -46,7 +43,7 @@ export const AuthProvider = ({ children }: ProviderProps) => {
           token: accessToken
         });
         if (response.data.isValid) {
-          setAuth({ isLoggedIn: true, userId: localStorage.getItem("userId") });
+          setAuth({ isLoggedIn: true, userId: Number(localStorage.getItem("userId")) });
         } else {
           localStorage.removeItem("access");
           localStorage.removeItem("refresh");
