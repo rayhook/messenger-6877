@@ -40,7 +40,7 @@ export interface ActiveChatState {
   messages: MessageType[] | null;
   user2: null | string;
   lastMessageId: null | number;
-  lastConversationId: null | string;
+  lastConversationId: null | number; // TODO:double check type
 }
 
 export interface SidebarProps {
