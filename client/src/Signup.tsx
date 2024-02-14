@@ -3,7 +3,6 @@ import { Redirect, useHistory } from "react-router-dom";
 import { Grid, Box, Button, FormControl, TextField, Typography, Theme } from "@material-ui/core";
 import { makeStyles, createStyles } from "@material-ui/core/styles";
 import sideImg from "./resources/bg-img.png";
-import { ChatIcon } from "./resources/ChatIcon";
 import { AuthContext } from "./context/AuthContext";
 import { Classes } from "./types";
 
@@ -46,11 +45,6 @@ export const useStyles = makeStyles((theme: Theme) =>
       opacity: "15%",
       top: "0rem",
       left: "0rem"
-    },
-    ChatIcon: {
-      width: theme.spacing(35),
-      height: theme.spacing(35),
-      marginBottom: theme.spacing(10)
     },
 
     loginRegisterFormContanier: {
@@ -210,7 +204,6 @@ export const RightGrid = ({
 export const SideImgColumn = ({ classes }: { classes: Classes }) => (
   <Box className={classes.sideImgContainer}>
     <Box className={classes.iconTitleContainer}>
-      <ChatIcon className={classes.ChatIcon} />
       <Typography variant="h4">Converse with anyone</Typography>
       <Typography variant="h4">with any language</Typography>
     </Box>
