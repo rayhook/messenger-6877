@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, SVGProps } from "react";
 import {
   FormControl,
   Button,
@@ -12,78 +12,82 @@ import {
   SvgIcon,
   InputAdornment,
   IconButton,
-  Grid
+  Grid,
+  Theme
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, createStyles } from "@material-ui/core/styles";
 import axios from "axios";
 import { ActiveChatContext } from "../../context/ActiveChatContext";
 import { axiosInstance } from "../../API/axiosConfig";
+import { getErrorMessage, reportError } from "../../utils/catchError";
 
-const useStyles = makeStyles((theme) => ({
-  dashboard: {
-    display: "flex",
-    alignItems: "center",
-    height: 70,
-    minWidth: "100%",
-    position: "fixed",
-    zIndex: 1250,
-    bottom: theme.spacing(10)
-  },
-  inputContainer: {
-    width: "75%"
-  },
-  input: {
-    height: 70,
-    backgroundColor: "#F4F6FA",
-    marginRight: theme.spacing(8),
-    marginLeft: theme.spacing(8),
-    borderRadius: 8,
-    marginBottom: 20
-  },
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    dashboard: {
+      display: "flex",
+      alignItems: "center",
+      height: 70,
+      minWidth: "100%",
+      position: "fixed",
+      zIndex: 1250,
+      bottom: theme.spacing(10)
+    },
+    inputContainer: {
+      width: "75%"
+    },
+    input: {
+      height: 70,
+      backgroundColor: "#F4F6FA",
+      marginRight: theme.spacing(8),
+      marginLeft: theme.spacing(8),
+      borderRadius: 8,
+      marginBottom: 20
+    },
 
-  button: {
-    backgroundColor: theme.palette.primary.main
-  },
-  dialogContent: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center"
-  },
-  imageContainer: {
-    display: "flex",
-    justifyContent: "center"
-  },
-  dialogImage: {
-    width: "80%"
-  },
-  dialogInput: {
-    marginBottom: theme.spacing(5)
-  },
-  targetInput: {
-    "& .MuiInputBase-input": {
-      width: "100%",
-      height: theme.spacing(5),
-      fontSize: "2rem",
-      marginBottom: theme.spacing(2)
+    button: {
+      backgroundColor: theme.palette.primary.main
+    },
+    dialogContent: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center"
+    },
+    imageContainer: {
+      display: "flex",
+      justifyContent: "center"
+    },
+    dialogImage: {
+      width: "80%"
+    },
+    dialogInput: {
+      marginBottom: theme.spacing(5)
+    },
+    targetInput: {
+      "& .MuiInputBase-input": {
+        width: "100%",
+        height: theme.spacing(5),
+        fontSize: "2rem",
+        marginBottom: theme.spacing(2)
+      }
+    },
+    dialogInputButton: {
+      marginTop: theme.spacing(5)
+    },
+    image: {
+      width: "15rem",
+      height: "14rem",
+      objectFit: "contain"
+    },
+    inputFile: {
+      margin: theme.spacing(5)
     }
-  },
-  dialogInputButton: {
-    marginTop: theme.spacing(5)
-  },
-  image: {
-    width: "15rem",
-    height: "14rem",
-    objectFit: "contain"
-  },
-  inputFile: {
-    margin: theme.spacing(5)
-  }
-}));
+  })
+);
 
-const Input = (props) => {
+const Input = (props: SVGProps<SVGSVGElement>) => {
   const classes = useStyles();
   const [text, setText] = useState("");
-  const [imageURL, setImageURL] = useState([]);
+  const [imageURL, setImageURL] = useState<string[]>([]);
   const [imageText, setImageText] = useState("");
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -100,19 +104,20 @@ const Input = (props) => {
     setImageURL([]);
   };
 
-  const handleChange = (event) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setText(event.target.value);
   };
 
-  const handleChangeImageText = (event) => {
+  const handleChangeImageText = (event: React.ChangeEvent<HTMLInputElement>) => {
     setImageText(event.target.value);
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.target as HTMLFormElement;
     const reqBody = {
       conversation: activeChat.conversationId,
-      text: event.target.text.value
+      text: form.text.value``
     };
 
     try {
@@ -124,30 +129,34 @@ const Input = (props) => {
       }));
       setText("");
     } catch (error) {
-      console.error("Failed to send message", error.message);
+      reportError({ customMessage: "Failed to send message", message: getErrorMessage(error) });
     }
   };
 
-  const handleUpload = async (event) => {
-    const imageURLs = Object.values(event.target.files).map((URL) => URL);
-    const fileURLs = imageURLs.map(async (imageURL) => {
-      try {
-        const data = new FormData();
-        data.append("file", imageURL);
-        data.append("upload_preset", process.env.REACT_APP_UPLOAD_PRESET);
-        data.append("cloud_name", process.env.REACT_APP_CLOUD_NAME);
-        const instance = axios.create();
-        const result = await instance.post(
-          "https://api.cloudinary.com/v1_1/rayhookchris/image/upload",
-          data
-        );
-        setImageURL((prevArray) => [...prevArray, result.data.url]);
-      } catch (err) {
-        console.error(err);
-      }
-    });
-    await Promise.all(fileURLs);
-    setLoading(false);
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const imageURLs = Array.from(event.target.files).map((URL) => URL);
+      const fileURLs = imageURLs.map(async (imageURL) => {
+        if (
+          process.env.REACT_APP_UPLOAD_PRESET &&
+          process.env.REACT_APP_CLOUD_NAME &&
+          process.env.REACT_APP_CLOUD_URI
+        )
+          try {
+            const data = new FormData();
+            data.append("file", imageURL);
+            data.append("upload_preset", process.env.REACT_APP_UPLOAD_PRESET);
+            data.append("cloud_name", process.env.REACT_APP_CLOUD_NAME);
+            const instance = axios.create();
+            const result = await instance.post(process.env.REACT_APP_CLOUD_URI, data);
+            setImageURL((prevArray) => [...prevArray, result.data.url]);
+          } catch (err) {
+            console.error(err);
+          }
+      });
+      await Promise.all(fileURLs);
+      setLoading(false);
+    }
   };
 
   return (
@@ -165,8 +174,8 @@ const Input = (props) => {
                 onChange={handleChange}
                 endAdornment={
                   <InputAdornment position="end">
-                    <IconButton variant="text" onClick={handleClickOpen}>
-                      <SvgIcon {...props}>
+                    <IconButton onClick={handleClickOpen}>
+                      <SvgIcon>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
@@ -197,16 +206,11 @@ const Input = (props) => {
         aria-describedby="image-dialog-description"
       >
         <DialogTitle id="image-dialog-title">
-          <Grid
-            container
-            alignItems="center"
-            justifyContent="space-between"
-            className={classes.dialogTitle}
-          >
+          <Grid container alignItems="center" justifyContent="space-between">
             {loading ? "Select Image" : "Images loaded"} <Button onClick={handleClose}>X</Button>
           </Grid>
         </DialogTitle>
-        <DialogContent className={classes.dialogContianer}>
+        <DialogContent>
           <DialogActions>
             <Grid container direction="column" spacing={4} alignItems="center">
               {loading && <input multiple type="file" onChange={handleUpload} />}
@@ -214,7 +218,7 @@ const Input = (props) => {
                 <Grid container direction="column" alignItems="center">
                   <Grid
                     container
-                    flexDirection="column"
+                    direction="column"
                     className={classes.dialogInput}
                     component="form"
                     noValidate
