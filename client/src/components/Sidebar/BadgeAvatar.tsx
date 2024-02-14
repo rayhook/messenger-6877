@@ -23,7 +23,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const UserAvatar = ({ sidebar, online }: { sidebar: boolean; online: string }) => {
+const UserAvatar = ({ sidebar, online }: { sidebar?: boolean; online: boolean }) => {
   const classes = useStyles();
 
   return (

@@ -13,7 +13,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const SnackbarError = (props) => {
+interface SnackBarProps {
+  snackBarOpen: boolean;
+  errorMessage: string;
+  setSnackBarOpen: (open: boolean) => Promise<void>;
+}
+
+const SnackbarError = (props: SnackBarProps) => {
   const classes = useStyles();
   return (
     <Snackbar
@@ -25,7 +31,8 @@ const SnackbarError = (props) => {
           <Button
             className={classes.icon}
             size="small"
-            onClick={() => props.setSnackBarOpen(false)}>
+            onClick={() => props.setSnackBarOpen(false)}
+          >
             <Close color="secondary" />
           </Button>
         </React.Fragment>

@@ -21,7 +21,7 @@ const Chat = ({ id, user2, handleSelectChat }: ChatProps) => {
   const classes = useStyles();
   return (
     <Box className={classes.root} onClick={() => handleSelectChat(id, user2)}>
-      <BadgeAvatar online="true" sidebar={true} />
+      <BadgeAvatar online={true} sidebar={true} />
       <ChatContent username={user2} />
     </Box>
   );
