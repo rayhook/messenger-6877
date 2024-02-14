@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { axiosInstance } from "../API/axiosConfig";
-import { ActiveChatContext } from "../context/activeChat";
+import { ActiveChatContext } from "../context/ActiveChatContext";
+import { getErrorMessage, reportError } from "../utils/catchError";
 
 const useConversations = () => {
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
@@ -14,7 +15,10 @@ const useConversations = () => {
         setActiveChat({ ...activeChat, conversations: conversations });
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching conversations", error.message);
+        reportError({
+          customMessage: "Error fetching conversations",
+          message: getErrorMessage(error)
+        });
         setLoading(false);
       }
     };
