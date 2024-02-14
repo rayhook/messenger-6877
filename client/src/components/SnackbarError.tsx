@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { Button, Snackbar } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Close from "@material-ui/icons/Close";
@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
 interface SnackBarProps {
   snackBarOpen: boolean;
   errorMessage: string;
-  setSnackBarOpen: (open: boolean) => Promise<void>;
+  setSnackBarOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const SnackbarError = (props: SnackBarProps) => {

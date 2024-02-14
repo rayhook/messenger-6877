@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
 import Signup from "./Signup";
 import Login from "./Login";
 import { Home, SnackbarError } from "./components";
-import { Redirect } from "react-router-dom/cjs/react-router-dom.min.js";
 
-const Routes = (props) => {
+const Routes = () => {
   const [errorMessage] = useState("");
   const [snackBarOpen, setSnackBarOpen] = useState(false);
 
