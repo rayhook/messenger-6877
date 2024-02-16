@@ -1,6 +1,7 @@
 import { Box, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { Search, Chat, CurrentUser } from "./index.js";
+import { Search, Chat, CurrentUser } from "./index";
+import { SidebarProps } from "../../types.js";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -17,9 +18,14 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const Sidebar = ({ handleChange, conversations, newContacts, searchTerm, handleSelectChat }) => {
+const Sidebar = ({
+  handleChange,
+  conversations,
+  newContacts,
+  searchTerm,
+  handleSelectChat
+}: SidebarProps) => {
   const classes = useStyles();
-
   return (
     <Box className={classes.root}>
       <CurrentUser />

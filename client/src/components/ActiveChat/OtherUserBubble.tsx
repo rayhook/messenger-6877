@@ -1,4 +1,3 @@
-import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box, Typography } from "@material-ui/core";
 
@@ -31,7 +30,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const OtherUserBubble = ({ text, time }) => {
+const OtherUserBubble = ({ text, time }: { text: string; time: string }) => {
   const classes = useStyles();
   return (
     <Box className={classes.root}>

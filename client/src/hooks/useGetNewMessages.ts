@@ -1,6 +1,7 @@
 import { useContext, useEffect } from "react";
 import { ActiveChatContext } from "../context/ActiveChatContext";
 import { axiosInstance } from "../API/axiosConfig";
+import { getErrorMessage, reportError } from "../utils/catchError";
 
 const useGetNewMessages = () => {
   const { activeChat, setActiveChat } = useContext(ActiveChatContext);
@@ -22,25 +23,28 @@ const useGetNewMessages = () => {
       if (newConversation && newConversation.length > 0) {
         setActiveChat((prevState) => ({
           ...prevState,
-          conversations: [...prevState.conversations, ...newConversation],
-          messages: [...prevState.messages, ...newMessages],
+          conversations: [...prevState.conversations, ...(newConversation || [])],
+          messages: [...(prevState.messages || []), ...(newMessages || [])],
           lastMessageId: last_message_id,
           lastConversationId: last_conversation_id
         }));
       } else if (newMessages && newMessages.length > 0) {
         setActiveChat((prevState) => ({
           ...prevState,
-          messages: [...prevState.messages, ...newMessages],
+          messages: [...(prevState.messages || []), ...(newMessages || [])],
           lastMessageId: last_message_id
         }));
       }
     } catch (error) {
-      console.error("Error fetching new messages", error.message);
+      reportError({
+        customMessage: "Error fetching new messages",
+        message: getErrorMessage(error)
+      });
     }
   };
 
   useEffect(() => {
-    let intervalId;
+    let intervalId: ReturnType<typeof setInterval>;
     intervalId = setInterval(() => getNewMessages(), 7000);
 
     return () => {

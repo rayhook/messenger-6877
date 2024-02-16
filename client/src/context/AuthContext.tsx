@@ -1,31 +1,49 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, SetStateAction, Dispatch } from "react";
 import axios from "axios";
 import { ActiveChatContext } from "./ActiveChatContext";
+import { UserDataType, ProviderProps } from "../types";
 
-export const AuthContext = createContext({
-  login: () => {},
-  logout: () => {},
+interface AuthContextType {
+  login: (userData: UserDataType) => Promise<void>;
+  logout: () => Promise<void>;
+  auth: AuthState;
+  setAuth: Dispatch<SetStateAction<AuthState>>;
+  signup: (userData: UserDataType) => Promise<void>;
+}
+
+interface AuthState {
+  isLoggedIn: boolean;
+  userId: number | null;
+}
+
+export const AuthContext = createContext<AuthContextType>({
+  login: async () => {},
+  logout: async () => {},
   auth: {
     isLoggedIn: false,
     userId: null
   },
-  setAuth: () => {}
+  setAuth: () => {},
+  signup: async () => {}
 });
 
-export const AuthProvider = ({ children }) => {
-  const [auth, setAuth] = useState({ isLoggedIn: !!localStorage.getItem("access"), userId: null });
+export const AuthProvider = ({ children }: ProviderProps) => {
+  const [auth, setAuth] = useState<AuthState>({
+    isLoggedIn: !!localStorage.getItem("access"),
+    userId: null
+  });
   const { setActiveChat } = useContext(ActiveChatContext);
 
   useEffect(() => {
     const validateToken = async () => {
-      const accessToekn = localStorage.getItem("access");
-      if (!accessToekn) return;
+      const accessToken = localStorage.getItem("access");
+      if (!accessToken) return;
       try {
         const response = await axios.post(process.env.REACT_APP_API_URL + "api/token/validate/", {
-          token: accessToekn
+          token: accessToken
         });
         if (response.data.isValid) {
-          setAuth({ isLoggedIn: true, userId: localStorage.getItem("userId") });
+          setAuth({ isLoggedIn: true, userId: Number(localStorage.getItem("userId")) });
         } else {
           localStorage.removeItem("access");
           localStorage.removeItem("refresh");
@@ -39,7 +57,7 @@ export const AuthProvider = ({ children }) => {
     validateToken();
   }, []);
 
-  const login = async (userData) => {
+  const login = async (userData: UserDataType) => {
     try {
       const response = await axios.post(process.env.REACT_APP_API_URL + "login/", userData);
 
@@ -48,12 +66,15 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("userId", response.data.userId);
 
       setAuth((prevState) => ({ ...prevState, isLoggedIn: true, userId: response.data.userId }));
-    } catch (err) {
-      console.error(err.message);
+    } catch (error) {
+      let message;
+      if (error instanceof Error) message = error.message;
+      else message = String(error);
+      console.error(message);
     }
   };
 
-  const signup = async (userData) => {
+  const signup = async (userData: UserDataType) => {
     try {
       const response = await axios.post(process.env.REACT_APP_API_URL + "register/", userData);
       if (response.status === 201) {
@@ -61,8 +82,11 @@ export const AuthProvider = ({ children }) => {
       } else {
         console.error("Register failed", response.statusText);
       }
-    } catch (err) {
-      console.error(err.message);
+    } catch (error) {
+      let message;
+      if (error instanceof Error) message = error.message;
+      else message = String(error);
+      console.error(message);
     }
   };
 
@@ -81,11 +105,13 @@ export const AuthProvider = ({ children }) => {
         newContacts: [],
         conversationId: null,
         messages: [],
-        users: [],
         lastMessageId: null
       }));
-    } catch (err) {
-      console.error("Logout failed", err.message);
+    } catch (error) {
+      let message;
+      if (error instanceof Error) message = error.message;
+      else message = String(error);
+      console.error(message);
     }
   };
 

@@ -2,11 +2,13 @@ import { useContext } from "react";
 import { axiosInstance } from "../API/axiosConfig";
 import { ActiveChatContext } from "../context/ActiveChatContext";
 import { AuthContext } from "../context/AuthContext";
+import { getErrorMessage, reportError } from "../utils/catchError";
+
 const useCreateConversation = () => {
   const { setActiveChat } = useContext(ActiveChatContext);
   const { setAuth } = useContext(AuthContext);
 
-  const createConversation = async (user2, searchTerm) => {
+  const createConversation = async (user2: string, searchTerm: string) => {
     try {
       const response = await axiosInstance.post("/conversations/", {
         user2,
@@ -23,7 +25,10 @@ const useCreateConversation = () => {
       }));
       setAuth((prevState) => ({ ...prevState, userId: userId }));
     } catch (error) {
-      console.error(`error creating conversation ${error.message}`);
+      reportError({
+        customMessage: "Error creating conversation",
+        message: getErrorMessage(error)
+      });
     }
   };
   return createConversation;

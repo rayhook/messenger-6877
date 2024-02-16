@@ -24,16 +24,22 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const Search = ({ handleChange, searchTerm }) => {
+const Search = ({
+  handleChange,
+  searchTerm
+}: {
+  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  searchTerm: string;
+}) => {
   const classes = useStyles();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
   };
 
   return (
-    <form>
-      <FormControl onSubmit={handleSubmit} fullWidth hiddenLabel>
+    <form onSubmit={handleSubmit}>
+      <FormControl fullWidth hiddenLabel>
         <FilledInput
           name="search"
           value={searchTerm}

@@ -1,6 +1,7 @@
 import { Box } from "@material-ui/core";
-import { BadgeAvatar, ChatContent } from "../Sidebar";
+import { BadgeAvatar, ChatContent } from ".";
 import { makeStyles } from "@material-ui/core/styles";
+import { ChatProps } from "../../types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -16,12 +17,11 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Chat = ({ id, user2, handleSelectChat }) => {
+const Chat = ({ id, user2, handleSelectChat }: ChatProps) => {
   const classes = useStyles();
-
   return (
     <Box className={classes.root} onClick={() => handleSelectChat(id, user2)}>
-      <BadgeAvatar username={user2} online="true" sidebar={true} />
+      <BadgeAvatar online={true} sidebar={true} />
       <ChatContent username={user2} />
     </Box>
   );

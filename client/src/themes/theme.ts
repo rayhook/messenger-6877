@@ -1,4 +1,13 @@
-import { createTheme } from "@material-ui/core";
+import { createTheme } from "@material-ui/core/styles";
+
+declare module "@material-ui/core/styles/createPalette" {
+  interface Palette {
+    bright: { main: string };
+  }
+  interface PaletteOptions {
+    bright: { main: string };
+  }
+}
 
 export const theme = createTheme({
   palette: {
@@ -41,7 +50,7 @@ export const theme = createTheme({
           fontSize: "1rem",
           width: "18rem"
         },
-        fontWeight: "800",
+        fontWeight: 800,
         paddingTop: "2rem",
         width: "28rem",
         height: "1rem",
